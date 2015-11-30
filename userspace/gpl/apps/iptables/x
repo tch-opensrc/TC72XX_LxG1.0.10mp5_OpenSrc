@@ -1,0 +1,13 @@
+Index: Makefile
+===================================================================
+--- Makefile	(revisión: 7069)
++++ Makefile	(copia de trabajo)
+@@ -23,7 +23,7 @@
+ IPTABLES_VERSION:=1.4.0rc1
+ OLD_IPTABLES_VERSION:=1.3.8
+ 
+-PREFIX:=/usr/local
++PREFIX:=/usr
+ LIBDIR:=$(PREFIX)/lib
+ BINDIR:=$(PREFIX)/sbin
+ MANDIR:=$(PREFIX)/man

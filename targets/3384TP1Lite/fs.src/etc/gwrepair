@@ -1,0 +1,20 @@
+#!/bin/sh
+while true; do
+  while [ \! $gw ]; do
+    sleep 30
+    route -n >/tmp/routes
+    while read dest gw foo; do
+      if [ $dest = "0.0.0.0" ]; then
+        break
+      fi
+    done </tmp/routes
+  done
+  logger -s -t gw-repair "default gateway is $gw"
+  while ping -q -c 2 $gw >/dev/null ; do
+    sleep $1 
+  done
+  logger -s -t gw-repair "gateway not reachable, restarting WAN"
+  kill -USR1 `cat /var/run/udhcpc.pid`
+  unset gw
+done &
+

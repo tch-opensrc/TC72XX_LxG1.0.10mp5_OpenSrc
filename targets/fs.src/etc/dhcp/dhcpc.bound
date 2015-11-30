@@ -1,0 +1,50 @@
+#!/bin/sh
+# Sample udhcpc renew script
+
+RESOLV_CONF="/etc/resolv.conf"
+
+[ -n "$broadcast" ] && BROADCAST="broadcast $broadcast"
+[ -n "$subnet" ] && NETMASK="netmask $subnet"
+
+/sbin/ifconfig $interface $ip $BROADCAST $NETMASK
+
+if [ -n "$router" ]
+then
+    oldrouter=`route -n | grep UG  | awk '{print $2}'`
+    if [ "$oldrouter" != "$router" ]; then
+        if [ -n "$oldrouter" ]; then
+            echo "Deleting routes"        
+	    while /sbin/route del default gw 0.0.0.0 dev $interface
+	    do :
+	    done
+        fi
+
+	for i in $router
+	do
+	/sbin/route add default gw $i dev $interface
+        if [ -f /usr/local/etc/avahi/hosts ]; then
+            echo adding $i to avahi hosts file
+            # Remove router.local from /usr/local/etc/avahi/hosts
+            sed -i '/router.local/d' /usr/local/etc/avahi/hosts 
+            # Add router.local from /usr/local/etc/avahi/hosts
+            echo $i router.local >> /usr/local/etc/avahi/hosts
+        fi
+	done
+    fi
+fi
+
+if [ -f /usr/local/etc/avahi/hosts ]; then
+    echo adding $ip to avahi hosts file
+    # Remove afpd.local from /usr/local/etc/avahi/hosts
+    sed -i '/afpd.local/d' /usr/local/etc/avahi/hosts 
+    # Add afpd.local from /usr/local/etc/avahi/hosts
+    echo $ip afpd.local >> /usr/local/etc/avahi/hosts
+fi
+
+echo -n > $RESOLV_CONF
+[ -n "$domain" ] && echo domain $domain >> $RESOLV_CONF
+for i in $dns
+do
+	echo adding dns $i
+	echo nameserver $i >> $RESOLV_CONF
+done

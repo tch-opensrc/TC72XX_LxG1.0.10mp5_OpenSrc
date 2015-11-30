@@ -1,0 +1,56 @@
+#!/bin/sh -e
+
+case "$1" in
+    configure)
+	# continue below
+    ;;
+
+    abort-upgrade|abort-remove|abort-deconfigure)
+	exit 0
+    ;;
+
+    *)
+	echo "postinst called with unknown argument \`$1'" >&2
+	exit 0
+    ;;
+esac
+
+update-alternatives --install /usr/bin/fakeroot fakeroot \
+			/usr/bin/fakeroot-sysv @FAKEROOT_SYSV_ALTPRIO@ \
+		--slave /usr/share/man/man1/fakeroot.1.gz \
+		fakeroot.1.gz /usr/share/man/man1/fakeroot-sysv.1.gz \
+		--slave /usr/share/man/man1/faked.1.gz \
+		faked.1.gz /usr/share/man/man1/faked-sysv.1.gz \
+		--slave /usr/share/man/es/man1/fakeroot.1.gz \
+		fakeroot.es.1.gz /usr/share/man/es/man1/fakeroot-sysv.1.gz \
+		--slave /usr/share/man/es/man1/faked.1.gz \
+		faked.es.1.gz /usr/share/man/es/man1/faked-sysv.1.gz \
+		--slave /usr/share/man/fr/man1/fakeroot.1.gz \
+		fakeroot.fr.1.gz /usr/share/man/fr/man1/fakeroot-sysv.1.gz \
+		--slave /usr/share/man/fr/man1/faked.1.gz \
+		faked.fr.1.gz /usr/share/man/fr/man1/faked-sysv.1.gz \
+		--slave /usr/share/man/sv/man1/fakeroot.1.gz \
+		fakeroot.sv.1.gz /usr/share/man/sv/man1/fakeroot-sysv.1.gz \
+		--slave /usr/share/man/sv/man1/faked.1.gz \
+		faked.sv.1.gz /usr/share/man/sv/man1/faked-sysv.1.gz
+
+update-alternatives --install /usr/bin/fakeroot fakeroot \
+			/usr/bin/fakeroot-tcp @FAKEROOT_TCP_ALTPRIO@ \
+		--slave /usr/share/man/man1/fakeroot.1.gz \
+		fakeroot.1.gz /usr/share/man/man1/fakeroot-tcp.1.gz \
+		--slave /usr/share/man/man1/faked.1.gz \
+		faked.1.gz /usr/share/man/man1/faked-tcp.1.gz \
+		--slave /usr/share/man/es/man1/fakeroot.1.gz \
+		fakeroot.es.1.gz /usr/share/man/es/man1/fakeroot-tcp.1.gz \
+		--slave /usr/share/man/es/man1/faked.1.gz \
+		faked.es.1.gz /usr/share/man/es/man1/faked-tcp.1.gz \
+		--slave /usr/share/man/fr/man1/fakeroot.1.gz \
+		fakeroot.fr.1.gz /usr/share/man/fr/man1/fakeroot-tcp.1.gz \
+		--slave /usr/share/man/fr/man1/faked.1.gz \
+		faked.fr.1.gz /usr/share/man/fr/man1/faked-tcp.1.gz \
+		--slave /usr/share/man/sv/man1/fakeroot.1.gz \
+		fakeroot.sv.1.gz /usr/share/man/sv/man1/fakeroot-tcp.1.gz \
+		--slave /usr/share/man/sv/man1/faked.1.gz \
+		faked.sv.1.gz /usr/share/man/sv/man1/faked-tcp.1.gz
+
+exit 0

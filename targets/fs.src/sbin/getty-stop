@@ -1,0 +1,5 @@
+#!/bin/sh
+PIDF=/var/run/getty-$1.pid
+start-stop-daemon -K -q -p $PIDF
+rm -rf $PIDF
+

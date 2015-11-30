@@ -1,0 +1,34 @@
+#!/bin/sh
+rm -f /usr/local/var/run/*pid*
+rm -f /usr/local/var/run/*/pid
+
+# HTTP check
+if [ -f /usr/local/etc/init.d/http ]
+then
+	/usr/local/etc/init.d/http  start
+fi
+
+# DBUS check
+if [ -f /usr/local/etc/init.d/dbus ]
+then
+	/usr/local/etc/init.d/dbus  start
+fi
+
+# AVAHI check
+if [ -f /usr/local/etc/init.d/avahi ]
+then
+	/usr/local/etc/init.d/avahi start
+fi
+
+# MT_DAAPD check
+if [ -f /usr/local/etc/init.d/mt-daap ]
+then
+	/usr/local/etc/init.d/mt-daap start
+fi	
+
+# CUPS check	
+if [ -f /usr/local/etc/init.d/cups ]
+then
+	/usr/local/etc/init.d/cups start
+fi
+	

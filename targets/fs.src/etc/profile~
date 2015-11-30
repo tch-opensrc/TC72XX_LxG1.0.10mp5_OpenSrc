@@ -1,0 +1,69 @@
+# /etc/profile: system-wide .profile file for the Bourne shells
+
+export PATH=/home/bin:/home/scripts:/opt/bin:/opt/scripts:/bin:/sbin:/usr/bin
+export LD_LIBRARY_PATH=/lib/public:/lib/private:/lib/gpl:/lib
+KERNELVER=2.6.30
+
+# TMOUT=0 means no busybox shell timeout.
+# if you want the busybox shell to timeout after some number of seconds of inactivity,
+# change the 0 to the number of seconds, e.g. 300.
+export TMOUT=0
+
+echo
+firsttime=`echo /var/udhcpd/udhcpd.lease*`
+if [ "$firsttime" = "/var/udhcpd/udhcpd.lease*" ]; then
+ echo "Loading drivers and kernel modules... "
+ echo
+# no-op
+# create directory in /var mounted for TMPFS
+ mknod /var/fuse c 10 229
+ chmod a+rw /var/fuse
+ mkdir -p /var/log /var/run /var/state/dhcp /var/ppp /var/udhcpd /var/zebra /var/siproxd /var/cache /var/tmp /var/samba /var/samba/share /var/samba/homes /var/samba/private /var/samba/locks
+ cp  /etc/smb.conf /var/samba/ 2>/dev/null
+
+ echo > /var/udhcpd/udhcpd.leases
+ ifconfig lo 127.0.0.1 netmask 255.0.0.0 broadcast 127.255.255.255 up
+# /etc/modules_install /lib/modules/$KERNELVER/extra
+ test -e /lib/modules/$KERNELVER/extra/bcm_log.ko && insmod /lib/modules/$KERNELVER/extra/bcm_log.ko
+ test -e /lib/modules/$KERNELVER/extra/pktflow.ko && insmod /lib/modules/$KERNELVER/extra/pktflow.ko
+ test -e /lib/modules/$KERNELVER/extra/pktcmf.ko && insmod /lib/modules/$KERNELVER/extra/pktcmf.ko
+ test -e /lib/modules/$KERNELVER/extra/bcmfap.ko && insmod /lib/modules/$KERNELVER/extra/bcmfap.ko
+ test -e /etc/cmf/cmfcfg && /etc/cmf/cmfcfg
+ test -e /lib/modules/$KERNELVER/extra/profdrvdd.ko && insmod /lib/modules/$KERNELVER/extra/profdrvdd.ko
+ test -e /lib/modules/$KERNELVER/extra/bcmxtmcfg.ko && insmod /lib/modules/$KERNELVER/extra/bcmxtmcfg.ko
+ test -e /lib/modules/$KERNELVER/extra/atmapi.ko && insmod /lib/modules/$KERNELVER/extra/atmapi.ko
+ test -e /lib/modules/$KERNELVER/extra/adsldd.ko && insmod /lib/modules/$KERNELVER/extra/adsldd.ko
+ test -e /lib/modules/$KERNELVER/extra/blaa_dd.ko && insmod /lib/modules/$KERNELVER/extra/blaa_dd.ko
+ test -e /lib/modules/$KERNELVER/extra/bcmprocfs.ko && insmod /lib/modules/$KERNELVER/extra/bcmprocfs.ko
+# test -e /lib/modules/$KERNELVER/kernel/net/ipv6/ipv6.ko && insmod /lib/modules/$KERNELVER/kernel/net/ipv6/ipv6.ko
+ test -e /lib/modules/$KERNELVER/kernel/net/atm/br2684.ko && insmod /lib/modules/$KERNELVER/kernel/net/atm/br2684.ko
+ test -e /lib/modules/$KERNELVER/extra/linux-kernel-bde.ko && insmod /lib/modules/$KERNELVER/extra/linux-kernel-bde.ko
+ test -e /lib/modules/$KERNELVER/extra/linux-user-bde.ko && insmod /lib/modules/$KERNELVER/extra/linux-user-bde.ko
+ test -e /lib/modules/$KERNELVER/extra/bcm_enet.ko && insmod /lib/modules/$KERNELVER/extra/bcm_enet.ko
+ test -e /lib/modules/$KERNELVER/extra/bcmsw.ko && insmod /lib/modules/$KERNELVER/extra/bcmsw.ko && ifconfig bcmsw up
+ test -e /lib/modules/$KERNELVER/extra/bcm_usb.ko && insmod /lib/modules/$KERNELVER/extra/bcm_usb.ko
+
+#WLAN Module
+ test -e /lib/modules/$KERNELVER/extra/wl.ko && insmod /lib/modules/$KERNELVER/extra/wl.ko
+ test -e /etc/wlan/rtecdc.trx && mount -t usbfs none /proc/bus/usb && /bin/bcmdl /etc/wlan/rtecdc.trx && sleep 2 && insmod /lib/modules/$KERNELVER/extra/wl-usb.ko
+ 
+ test -e /lib/modules/$KERNELVER/extra/dect.ko && insmod /lib/modules/$KERNELVER/extra/dect.ko 
+ test -e /lib/modules/$KERNELVER/extra/dspdd.ko && insmod /lib/modules/$KERNELVER/extra/dspdd.ko
+ test -e /lib/modules/$KERNELVER/extra/endpointdd.ko && insmod /lib/modules/$KERNELVER/extra/endpointdd.ko
+ test -e /lib/modules/$KERNELVER/extra/p8021ag.ko && insmod /lib/modules/$KERNELVER/extra/p8021ag.ko
+
+# other modules
+ test -e /lib/modules/$KERNELVER/extra/isdn.ko && insmod /lib/modules/$KERNELVER/extra/isdn.ko
+ test -e /lib/modules/$KERNELVER/kernel/drivers/isdn/capi/capi.ko && insmod /lib/modules/$KERNELVER/kernel/drivers/isdn/capi/capi.ko 
+ test -e /lib/modules/$KERNELVER/extra/i2c_bcm6xxx.ko && insmod /lib/modules/$KERNELVER/extra/i2c_bcm6xxx.ko
+ test -e /lib/modules/$KERNELVER/extra/bcm3450.ko && insmod /lib/modules/$KERNELVER/extra/bcm3450.ko
+ test -e /lib/modules/$KERNELVER/extra/gpon_i2c.ko && insmod /lib/modules/$KERNELVER/extra/gpon_i2c.ko
+ test -e /lib/modules/$KERNELVER/extra/bcmgpon.ko && insmod /lib/modules/$KERNELVER/extra/bcmgpon.ko
+ test -e /lib/modules/$KERNELVER/extra/bcmmoca.ko && insmod /lib/modules/$KERNELVER/extra/bcmmoca.ko
+ test -e /lib/modules/$KERNELVER/extra/bcmvlan.ko && insmod /lib/modules/$KERNELVER/extra/bcmvlan.ko
+ test -e /lib/modules/$KERNELVER/extra/pwrmngtd.ko && insmod /lib/modules/$KERNELVER/extra/pwrmngtd.ko
+ test -e /lib/modules/$KERNELVER/kernel/drivers/char/hw_random/rng-core.ko && insmod /lib/modules/$KERNELVER/kernel/drivers/char/hw_random/rng-core.ko
+ test -e /lib/modules/$KERNELVER/extra/bcmtrng.ko && insmod /lib/modules/$KERNELVER/extra/bcmtrng.ko
+ smd
+fi
+

@@ -1,0 +1,250 @@
+#!/bin/bash
+
+source $BUILD_DIR/kernel/linux/.config
+
+TOP_DIR=`pwd`
+
+if [ "$MOD_DIR" == "" ] ; then
+    MOD_DIR=$PROFILE/modules
+fi
+
+if [ "$BUILD_OPROFILE" == "y" ]; then
+    rm -rf $PROFILE/op
+    mkdir $PROFILE/op
+    mkdir $PROFILE/op/bin_symbols
+    echo "Save copies of kernel modules with symbols for oprofile"
+    cp -av $MOD_DIR/lib/modules $PROFILE/op/bin_symbols
+    echo "Copy vmlinux with symbols for oprofile"
+    cp -av $KERNEL_DIR/vmlinux $PROFILE/op/bin_symbols
+    echo "Copy oprofile applications"
+    cp -av $USERAPPS_DIR/opensource/oprofile/op_bin/* $PROFILE/op
+    echo "Copy oprofile configuration files"
+    cp -av $USERAPPS_DIR/opensource/oprofile/op_home_dir/* $PROFILE/op
+fi
+
+if [ "$FSSRC_DIR" == "" ]; then
+    FSSRC_DIR=./fs.src
+fi
+
+if [ "$INSTALL_DIR" == "" ]; then
+    INSTALL_DIR=./$PROFILE/fs.install
+fi
+
+if [ "$BRCM_CHIP_FSSRC_DIR" == "" ]; then
+    BRCM_CHIP_FSSRC_DIR=./$PROFILE/fs.src
+fi
+
+ROOTFS=$PROFILE/fs
+
+# Create file system dir
+if [ -L $ROOTFS ]; then
+  rm -rf $ROOTFS/*
+else
+  rm -rf $ROOTFS
+  mkdir $ROOTFS
+fi
+chmod 777 $ROOTFS
+# Copy files onto root file system
+echo "Creating target root file system..."
+if [ -d $FSSRC_DIR ]; then
+	cp -av $FSSRC_DIR/* $ROOTFS
+fi
+if [ -d $INSTALL_DIR ]; then
+	cp -av $INSTALL_DIR/* $ROOTFS
+fi
+if [ -d $BRCM_CHIP_FSSRC_DIR ]; then
+    cp -av $BRCM_CHIP_FSSRC_DIR/* $ROOTFS
+fi
+
+# Create directories as needed
+mkdir $ROOTFS/dev
+mkdir $ROOTFS/mnt
+mkdir $ROOTFS/sys
+mkdir $ROOTFS/proc
+mkdir $ROOTFS/var
+mkdir $ROOTFS/etc/adsl
+mkdir $ROOTFS/data
+cp -av $BRCMDRIVERS_DIR/broadcom/char/adsl/bcm9$BRCM_CHIP/*.bin  $ROOTFS/etc/adsl
+
+if [ "$BRCM_CHIP" == "6816" ] ; then
+        mkdir $ROOTFS/etc/moca
+             cp -av $BRCMDRIVERS_DIR/broadcom/char/moca/bcm9$BRCM_CHIP/image/moca10coreA0.bin  $ROOTFS/etc/moca
+             cp -av $BRCMDRIVERS_DIR/broadcom/char/moca/bcm9$BRCM_CHIP/image/moca11coreA0.bin  $ROOTFS/etc/moca
+             cp -av $BRCMDRIVERS_DIR/broadcom/char/moca/bcm9$BRCM_CHIP/image/moca10core.bin  $ROOTFS/etc/moca
+             cp -av $BRCMDRIVERS_DIR/broadcom/char/moca/bcm9$BRCM_CHIP/image/moca11core.bin  $ROOTFS/etc/moca
+        mkdir $ROOTFS/etc/cmf
+             cp -av $BRCMDRIVERS_DIR/broadcom/char/pktcmf/bcm9$BRCM_CHIP/ffe/*.h  $ROOTFS/etc/cmf
+             cp -av $BRCMDRIVERS_DIR/broadcom/char/pktcmf/bcm9$BRCM_CHIP/ffe/*.obj  $ROOTFS/etc/cmf
+             cp -av $BRCMDRIVERS_DIR/broadcom/char/pktcmf/bcm9$BRCM_CHIP/ffe/cmfcfg  $ROOTFS/etc/cmf
+             cp -av $BRCMDRIVERS_DIR/broadcom/char/pktcmf/bcm9$BRCM_CHIP/ffe/cmfcfg_pad100_port7  $ROOTFS/etc/cmf
+fi
+
+if [ "$BRCM_KERNEL_OPROFILE" == "y" ] ; then
+   mkdir -p $ROOTFS/dev/oprofile
+fi
+
+DEFAULTCFG=`echo $DEFAULTCFG_DIR/$BRCM_DEFAULTCFG|sed -e 's/\"//g'`
+if [ -f "$DEFAULTCFG" ]; then
+   cp -v $DEFAULTCFG $ROOTFS/etc/default.cfg; chmod a+r $ROOTFS/etc/default.cfg
+elif [ $BRCM_DEFAULTCFG != '""' ]; then
+   echo
+   echo "        No default run-time config file called $BRCM_DEFAULTCFG in $DEFAULTCFG_DIR"
+   echo "        Check your profile setting!"
+   exit 1
+else
+   echo
+fi
+
+#
+# The logic to test BRCM_CERT_FILE must be different than the logic to test
+# BRCM_DEFAULTCFG (above) because BRCM_CERT_FILE can have 3 possible values:
+# 1. If user does not select TR69_BCM_SSL, then BRCM_CERT_FILE=
+# 2. If user selects TR69_BCM_SSL, but does not specify a cert file, then BRCM_CERT_FILE=""
+# 3. If user selects TR69_BMC_SSL, and specifies a cert file, then BRCM_CERT_FILE="somefilename"
+#
+# The elif line tests for case 1 first, so that if BRCM_CERT_FILE is blank,
+# the first condition will be false and the second condition [ $BRCM_CERT_FILE != '""' ]
+# will not be tested.  That second condition will cause bash to complain if BRCM_CERT_FILE is blank.
+#
+DEFAULT_CERT_FILE=`echo $DEFAULTCFG_DIR/$BRCM_CERT_FILE|sed -e 's/\"//g'`
+
+if [ -f "$DEFAULT_CERT_FILE" ]; then
+   cp -v $DEFAULT_CERT_FILE $ROOTFS/etc/acscert.cacert; chmod a+r $ROOTFS/etc/acscert.cacert
+elif [ "X$BRCM_CERT_FILE" != "X" ] && [ $BRCM_CERT_FILE != '""' ]; then
+   echo
+   echo "        No certificate file called $BRCM_CERT_FILE in $DEFAULTCFG_DIR"
+   echo "        Check your profile setting!"
+   exit 1
+else
+   echo
+fi
+
+# Create symbolic links
+mkdir $ROOTFS/dev/misc
+ln -s /var/fuse $ROOTFS/dev/misc/fuse
+ln -s /var/fuse $ROOTFS/dev/fuse
+ln -s /var/mtab $ROOTFS/etc/mtab
+ln -s /var/log/log $ROOTFS/dev/log
+ln -s /var/sysmsg $ROOTFS/etc/sysmsg
+ln -s /var/passwd $ROOTFS/etc/passwd
+ln -s /var/passwd- $ROOTFS/etc/passwd-
+ln -s /var/passwd+ $ROOTFS/etc/passwd+
+ln -s /var/printcap $ROOTFS/etc/printcap
+ln -s /var/group $ROOTFS/etc/group
+ln -s /var/ppp/pppmsg $ROOTFS/etc/pppmsg
+ln -s /var/fyi/sys/dns $ROOTFS/etc/resolv.conf
+ln -s /var/fyi/sys/gateway $ROOTFS/etc/gateway.conf
+ln -s /var/udhcpd/udhcpd.conf $ROOTFS/etc/udhcpd.conf
+ln -s /var/udhcpd/udhcpd.leases $ROOTFS/etc/udhcpd.leases
+ln -s /var/ipsec/ipsec.conf $ROOTFS/etc/ipsec.conf
+ln -s /var/ipsec/racoon.conf $ROOTFS/etc/racoon.conf
+ln -s /var/ipsec/psk.txt $ROOTFS/etc/psk.txt
+ln -s /var/iproute2/rt_tables $ROOTFS/etc/iproute2/rt_tables
+ln -s /var/tmp $ROOTFS/tmp
+ln -s /var/samba $ROOTFS/etc/samba
+ln -s bin/busybox $ROOTFS/init
+
+
+if [ -x $PROFILE/special-buildFS ]; then
+   $PROFILE/special-buildFS
+fi
+
+# Copy proprietary binaries if any
+FSBIN=`ls $TOP_DIR/fs.bin|wc -l`
+if [ $FSBIN != 0 ]; then
+   echo "Copying proprietary binaries..."
+   cd $TOP_DIR
+   cp -avf fs.bin/* $ROOTFS
+fi
+
+# Copy 3rdParty supplied .ko onto dummy .ko
+if [ "$BRCM_DRIVER_ISDN" == "m" ] ; then
+   echo "Copying 3rdParty kernel objects (.ko) ..."
+   eval "find $TOP_DIR/$ROOTFS/../modules/lib/modules/. -name '*isdn.ko' | xargs cp -f $BRCMDRIVERS_DIR/broadcom/char/isdn/bcm9$BRCM_CHIP/3rdParty/*isdn.ko_3rdParty "
+fi
+
+#Copying gpon tools
+if [ "$BRCM_DRIVER_GPON" != "" ] ; then
+   if [ "$CONFIG_BCM_GPON_IMPL" == "2" ]; then
+     TGT_DIR=$ROOTFS/etc
+   else
+     TGT_DIR=$ROOTFS/opt
+   fi
+
+   echo "Copying gpon tools to $TGT_DIR"
+     if [ "$BRCM_GPON_FPGA" == "y" ]; then
+     cp -avrf $BRCMDRIVERS_DIR/broadcom/char/gpon/impl$CONFIG_BCM_GPON_IMPL/fs/fpga/gpon/* $TGT_DIR
+     else
+     cp -avrf $BRCMDRIVERS_DIR/broadcom/char/gpon/impl$CONFIG_BCM_GPON_IMPL/fs/$BRCM_CHIP/gpon/* $TGT_DIR
+     fi
+
+   if [ -d $ROOTFS/opt/modules ]; then
+     pushd $ROOTFS/opt/modules && for f in *.ko.save; do mv "$f" "${f%.ko.save}.ko"; done
+     popd
+   fi
+fi
+
+#Copying i2c scripts to /opt/scripts
+if [ "$BRCM_DRIVER_I2C" != "" ] ; then
+   echo "Copying i2c scripts to /opt/"
+   cp -avrf $BRCMDRIVERS_DIR/broadcom/char/i2c/chips/impl1/fs/* $ROOTFS/opt
+fi
+
+#Copying bcmlog tools to /usr/local
+if [ "$BRCM_DRIVER_LOG" != "" ] ; then
+   echo "Copying bcmlog tools to /opt/..."
+   cp -avrf $BRCMDRIVERS_DIR/broadcom/char/bcmlog/impl1/fs/* $ROOTFS/opt
+   if [ -d $ROOTFS/opt/modules ]; then
+     pushd $ROOTFS/opt/modules && for f in *.ko.save; do mv "$f" "${f%.ko.save}.ko"; done
+     popd
+   fi
+fi
+
+cd $MOD_DIR
+cp -a lib $TOP_DIR/$ROOTFS/.
+
+if [ "$STRIP" != "/bin/touch" ]; then
+# Stripping unneeded module symbols only when strip is "enabled"
+echo "Stripping kernel modules..."
+find $TOP_DIR/$ROOTFS/lib/modules -name "*.ko"
+#Modules that need parameters cannot be stripped
+eval "find $TOP_DIR/$ROOTFS/lib/modules -name '*.ko' ! -name 'ip*.ko' |xargs $STRIP --strip-unneeded"
+# However do strip debug symbols, in case debug symbols are included
+#eval "find $TOP_DIR/$ROOTFS/lib/modules -name 'ip*.ko' |xargs $STRIP --strip-debug"
+fi
+
+
+#delete unwanted module
+echo "deleting intermediate wl modules"
+MODULE_CLEAN_UP="wldrv.ko wl_tmp_partial.ko wlpartial.ko"
+#remove unnecessary wlan driver
+if [ "${WLBUS}"  != "" ]; then
+    if [ `expr index $WLBUS pci` == 0 ]; then
+           MODULE_CLEAN_UP=${MODULE_CLEAN_UP}" wl.ko"
+    fi
+    if [ `expr index $WLBUS usb` == 0 ]; then
+           MODULE_CLEAN_UP=${MODULE_CLEAN_UP}" wl-usb.ko"
+    fi
+else
+   MODULE_CLEAN_UP=${MODULE_CLEAN_UP}" wl-usb.ko"
+fi
+for f in $MODULE_CLEAN_UP; do \
+   eval "find $TOP_DIR/$ROOTFS/lib/modules -name $f |xargs rm -f";\
+done
+eval "find $TOP_DIR/$ROOTFS/lib/modules -name wlobj-*.ko | xargs rm -f"
+
+# Continue to strip user apps and shared libraries using sstrip
+# Even though libcreduction did some stripping, we can make the
+# libraries even smaller by doing sstrip here.  Also libcreduction
+# does not process all libs, e.g. libmdm.so
+echo "Stripping userapps and shared libraries and more..."
+#$SSTRIP $TOP_DIR/$ROOTFS/bin/* $TOP_DIR/$ROOTFS/lib/*.so* $TOP_DIR/$ROOTFS/lib/*/*.so*
+$STRIP $TOP_DIR/$ROOTFS/bin/* $TOP_DIR/$ROOTFS/lib/*.so* 
+
+echo "$STRIP $TOP_DIR/$ROOTFS/bin/* $TOP_DIR/$ROOTFS/lib/*.so*"
+
+# Symlink cms libraries needed by busybox, which is also the actual /sbin/init
+# When user space boots, LD_LIBRARY_PATH hasn't been parsed yet
+#test -e $TOP_DIR/$ROOTFS/lib/public/libcms_msg.so && ln -s /lib/public/libcms_msg.so $TOP_DIR/$ROOTFS/lib/libcms_msg.so
+#test -e $TOP_DIR/$ROOTFS/lib/public/libcms_boardctl.so && ln -s /lib/public/libcms_boardctl.so $TOP_DIR/$ROOTFS/lib/libcms_boardctl.so
+#test -e $TOP_DIR/$ROOTFS/lib/public/libcms_util.so && ln -s /lib/public/libcms_util.so $TOP_DIR/$ROOTFS/lib/libcms_util.so

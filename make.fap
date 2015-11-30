@@ -1,0 +1,25 @@
+#****************************************************************************
+#
+#  Copyright (c) 2009  Broadcom Corporation
+#  All Rights Reserved
+#  No portions of this material may be reproduced in any form without the
+#  written permission of:
+#          Broadcom Corporation
+#          5300 California Ave
+#          Irvine, California 92617
+#  All information contained in this document is Broadcom Corporation
+#  company private, proprietary, and trade secret.
+#
+#****************************************************************************
+
+# Makefile for all FAP builds
+
+
+#############################################################################
+#                                                                            
+#  Create the temporary file that will contain the FAP module size
+#                                                                            
+#############################################################################
+$(shell echo '#define FAP_CORE_SIZE 0' >  $(SHARED_DIR)/opensource/include/bcm963xx/fap_mod_size.h )
+$(shell echo '#define FAP_INIT_SIZE 0' >> $(SHARED_DIR)/opensource/include/bcm963xx/fap_mod_size.h ) 
+

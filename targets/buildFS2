@@ -1,0 +1,113 @@
+#!/bin/bash
+
+# This script runs under fakeroot.  The fakeroot utility has 
+# problems under 64-bit/multi-processor/preemptive kernel, so
+# we run it only when necessary.
+
+source $BUILD_DIR/kernel/linux/.config
+
+# Create devices
+# (Swited from device table to fakeroot for device nodes - always use makeDevs)
+./makeDevs
+
+# make root file system image
+if [ "$BRCM_KERNEL_ROOTFS" = "squashfs" ]; then
+        $HOSTTOOLS_DIR/mksquashfs $TARGET_FS $PROFILE_DIR/rootfs.img -be -noappend -all-root -b $BRCM_SQUASHFS_BLOCK_SIZE $FS_COMPRESSION
+elif [ "$BRCM_KERNEL_ROOTFS" = "cramfs" ]; then
+    $HOSTTOOLS_DIR/mkcramfs -r $TARGET_FS $PROFILE_DIR/rootfs.img
+elif [ "$BRCM_KERNEL_ROOTFS" = "jffs2" ]; then
+    cp $KERNEL_DIR/vmlinux $PROFILE_DIR/.
+    $STRIP --remove-section=.note --remove-section=.comment $PROFILE_DIR/vmlinux
+    $OBJCOPY -O binary $PROFILE_DIR/vmlinux $PROFILE_DIR/vmlinux.bin
+    $HOSTTOOLS_DIR/cmplzma -k -2 $PROFILE_DIR/vmlinux $PROFILE_DIR/vmlinux.bin $PROFILE_DIR/vmlinux.lz
+    cp $PROFILE_DIR/../cfe/cfe${BRCM_CHIP}ram.bin $TARGET_FS/cferam.bin
+    cp $PROFILE_DIR/vmlinux.lz $TARGET_FS/.
+    echo -e "/cferam.bin" > $HOSTTOOLS_DIR/nocomprlist
+    echo -e "/vmlinux.lz" >> $HOSTTOOLS_DIR/nocomprlist
+    chmod +w $TARGET_FS/etc/fstab
+    echo -e "mtd:data\t/data\tjffs2\tdefaults\t0\t0\n" >> $TARGET_FS/etc/fstab
+    chmod -w $TARGET_FS/etc/fstab
+    $HOSTTOOLS_DIR/mkfs.jffs2 -b -p -n -e $FLASH_NAND_BLOCK_16KB -r $TARGET_FS -o $PROFILE_DIR/rootfs16kb.img -N $HOSTTOOLS_DIR/nocomprlist
+    $HOSTTOOLS_DIR/mkfs.jffs2 -b -p -n -e $FLASH_NAND_BLOCK_128KB -r $TARGET_FS -o $PROFILE_DIR/rootfs128kb.img -N $HOSTTOOLS_DIR/nocomprlist
+    rm $HOSTTOOLS_DIR/nocomprlist
+elif [ "$BRCM_KERNEL_ROOTFS" = "ubifs" ]; then
+    echo "Making UBIFS root filesystem image..."
+    mkdir -p tmp
+    peb=$BRCM_NANDFLASH_BLOCK_SIZE
+    page=$BRCM_NANDFLASH_PAGE_SIZE
+    leb=$(($peb- $page * 2))
+    $HOSTTOOLS_DIR/mkfs.ubifs -U -D $PROFILE_DIR/devtable.txt -r $TARGET_FS -o tmp/ubifs.img -m $page -e $leb -c 2047
+
+    vol_size=$(du -sm tmp/ubifs.img | cut -f1)
+
+    echo "[ubifs]" > tmp/ubinize.cfg 
+    echo "mode=ubi" >> tmp/ubinize.cfg
+    echo "image=tmp/ubifs.img" >> tmp/ubinize.cfg
+    echo "vol_id=0" >> tmp/ubinize.cfg
+    echo "vol_size=${vol_size}MiB" >> tmp/ubinize.cfg
+    echo "vol_type=dynamic" >> tmp/ubinize.cfg
+    echo "vol_name=rootfs" >> tmp/ubinize.cfg
+    echo "vol_flags=autoresize" >> tmp/ubinize.cfg
+
+    $HOSTTOOLS_DIR/mtd-utils/ubi-utils/ubinize -o $PROFILE_DIR/rootfs.img -m $page -p $peb tmp/ubinize.cfg
+fi
+
+if [ -d "fs.apps" ]; then
+    # nimah - Copy base/common files from /target/fs.apps to /target/<PROFILE>/fs.apps
+    cp -rP $BUILD_DIR/targets/fs.apps $PROFILE_DIR/
+
+    if [ "$BRCM_KERNEL_ROOTFS" = "squashfs" ]; then
+	echo "Creating JFFS2 image of apps..."
+        # preload of fakeroot will fail anyway so don't try, this way we don't have an error message during the build
+        export LD_PRELOAD=
+        if [ "$APPS_IMAGE_NAME" != "" ]; then
+            echo $PROFILE_DIR/$APPS_IMAGE_NAME > $PROFILE_DIR/fs.apps/version.txt
+        else
+            echo $PROFILE_DIR/apps.bin > $PROFILE_DIR/fs.apps/version.txt
+        fi
+        echo `date` >> $PROFILE_DIR/fs.apps/version.txt
+        echo `whoami`@`hostname | sed -e s/\(.\{1,64\}\).*/\1/` >> $PROFILE_DIR/fs.apps/version.txt
+        echo `$CC -v 2>&1 | tail -n 1` >> $PROFILE_DIR/fs.apps/version.txt
+        if [ -f $BUILD_DIR/kernel/linux/extraversion.mk ]; then 
+            echo "Version:" `grep -r "EXTRAVERSION = -" $BUILD_DIR/kernel/linux/extraversion.mk| sed s/"EXTRAVERSION = -"//` >> $PROFILE_DIR/fs.apps/version.txt
+        else
+            echo "Version:" `grep -r "EXTRAVERSION = -" $BUILD_DIR/kernel/linux/Makefile | sed s/"EXTRAVERSION = -"//` >> $PROFILE_DIR/fs.apps/version.txt
+        fi
+	$HOSTTOOLS_DIR/jffs2/mkjffs2 -q -b -p 65536 -r $PROFILE_DIR/fs.apps -o $PROFILE_DIR/apps.jffs2
+	echo "done"
+    elif [ "$BRCM_KERNEL_ROOTFS" = "ubifs" ]; then
+        echo "Creating UBIFS image of apps..."
+        if [ "$APPS_IMAGE_NAME" != "" ]; then
+            echo $PROFILE_DIR/$APPS_IMAGE_NAME > $PROFILE_DIR/fs.apps/version.txt
+        else
+            echo $PROFILE_DIR/apps.bin > $PROFILE_DIR/fs.apps/version.txt
+        fi
+        echo `date` >> $PROFILE_DIR/fs.apps/version.txt
+        echo `whoami`@`hostname | sed -e s/\(.\{1,64\}\).*/\1/` >> $PROFILE_DIR/fs.apps/version.txt
+        echo `$CC -v 2>&1 | tail -n 1` >> $PROFILE_DIR/fs.apps/version.txt
+        if [ -f $BUILD_DIR/kernel/linux/extraversion.mk ]; then 
+            echo "Version:" `grep -r "EXTRAVERSION = -" $BUILD_DIR/kernel/linux/extraversion.mk| sed s/"EXTRAVERSION = -"//` >> $PROFILE_DIR/fs.apps/version.txt
+        else
+            echo "Version:" `grep -r "EXTRAVERSION = -" $BUILD_DIR/kernel/linux/Makefile | sed s/"EXTRAVERSION = -"//` >> $PROFILE_DIR/fs.apps/version.txt
+        fi
+        peb=$BRCM_NANDFLASH_BLOCK_SIZE
+        page=$BRCM_NANDFLASH_PAGE_SIZE
+        leb=$(($peb- $page * 2))
+
+        $HOSTTOOLS_DIR/mkfs.ubifs -U -D $PROFILE_DIR/devtable.txt -r $PROFILE_DIR/fs.apps -o tmp/apps_ubifs.img -m $page -e $leb -c 2047
+
+    	vol_size=$(du -sm tmp/apps_ubifs.img | cut -f1)
+
+	echo "[ubifs]" > tmp/ubinize.cfg 
+	echo "mode=ubi" >> tmp/ubinize.cfg
+	echo "image=tmp/apps_ubifs.img" >> tmp/ubinize.cfg
+	echo "vol_id=0" >> tmp/ubinize.cfg
+	echo "vol_size=${vol_size}MiB" >> tmp/ubinize.cfg
+	echo "vol_type=dynamic" >> tmp/ubinize.cfg
+	echo "vol_name=linuxapps" >> tmp/ubinize.cfg
+	echo "vol_flags=autoresize" >> tmp/ubinize.cfg
+
+	$HOSTTOOLS_DIR/mtd-utils/ubi-utils/ubinize -o $PROFILE_DIR/apps.img -m $page -p $peb tmp/ubinize.cfg
+	rm -rf ./tmp
+    fi
+fi

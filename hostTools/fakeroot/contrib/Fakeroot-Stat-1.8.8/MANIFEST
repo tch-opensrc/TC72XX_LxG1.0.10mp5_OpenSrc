@@ -1,0 +1,7 @@
+Makefile.PL
+MANIFEST
+README
+lib/Fakeroot/Stat.pm
+Stat.xs
+t/Fakeroot-Stat.t
+META.yml                                 Module meta-data (added by MakeMaker)

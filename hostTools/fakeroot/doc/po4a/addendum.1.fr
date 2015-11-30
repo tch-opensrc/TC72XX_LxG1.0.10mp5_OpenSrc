@@ -1,0 +1,3 @@
+PO4A-HEADER:mode=after;position=AUTEUR;beginboundary=.SH
+.SH TRADUCTION
+Sylvain Cherrier <sylvain.cherrier@free.fr>.

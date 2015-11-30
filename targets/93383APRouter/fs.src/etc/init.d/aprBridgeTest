@@ -1,0 +1,91 @@
+#!/bin/sh
+echo 
+
+# Setup our aprBridge in TEST MODE. 
+# In test mode the eth0 interface is added to the bridge and the
+# bridge will DHCP for an IP address.
+# If this script is called with "nodhcp" parameter, it will use
+# a static IP address.
+# 
+# ex: aprBridgeTest
+#     aprBridgeTest nodhcp
+
+#echo 
+echo aprbridge TEST setup
+echo --------------------
+
+#
+# Test Mode assumes bridge is already setup, so delete it
+ifconfig aprBridge down
+brctl delbr aprBridge
+
+#
+#Add our bridge
+brctl addbr aprBridge
+
+#
+#Set our eth's IP to nothing
+ifconfig eth0 0.0.0.0
+ifconfig eth0 up
+ifconfig ethsw0 0.0.0.0
+ifconfig ethsw0 up
+ifconfig ethsw1 0.0.0.0
+ifconfig ethsw1 up
+ifconfig ethsw2 0.0.0.0
+ifconfig ethsw2 up
+ifconfig ethsw3 0.0.0.0
+ifconfig ethsw3 up
+ifconfig wlan0 0.0.0.0
+ifconfig wlan0 up
+ifconfig wlan1 0.0.0.0
+ifconfig wlan1 up
+ifconfig cmlan_ipstack0 0.0.0.0
+ifconfig cmlan_ipstack0 up
+
+#
+#Add our eth's to be bridged
+brctl addif aprBridge eth0
+brctl addif aprBridge ethsw0
+brctl addif aprBridge ethsw1
+brctl addif aprBridge ethsw2
+brctl addif aprBridge ethsw3
+brctl addif aprBridge wlan0
+brctl addif aprBridge wlan1
+brctl addif aprBridge cmlan_ipstack0
+#
+#Do we need to bring these up?
+#ifconfig eth1 up
+#ifconfig eth2 up
+#ifconfig eth3 up
+
+#
+#Give our bridge an IP Address
+if [ "$1" == "nodhcp" ] ; then
+ifconfig aprBridge 192.168.1.2 netmask 255.255.255.0
+else
+ifconfig aprBridge 0.0.0.0
+fi
+
+#
+#Startup our bridge
+ifconfig aprBridge up
+
+#
+#Show our bridge
+brctl show
+echo 
+echo apr bridge setup completed!
+echo 
+
+#
+# DHCP if we need to
+if [ "$1" == "nodhcp" ] ; then
+echo aprBridge using static IP address
+else
+echo aprBridge will DHCP for IP address
+/sbin/udhcpc -b -i aprBridge -p /var/run/udhcpc.pid -s /etc/dhcp/dhcpc.script 
+fi
+echo
+echo
+
+

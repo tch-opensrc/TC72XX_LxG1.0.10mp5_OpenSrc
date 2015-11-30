@@ -1,0 +1,55 @@
+# File: bcmdrivers/broadcom/net/venet/impl1/Makefile
+#
+# Makefile for the BCM93380 virtual Enet driver
+#
+
+ifeq ($(strip $(CONFIG_BCM_APROUTER)),y)
+ EXTRA_CFLAGS += -DBRCM_APROUTER_BUILD=1
+endif
+
+ifneq ($(strip $(CONFIG_BCM_VENET)),)
+obj-$(CONFIG_BCM_VENET) = bcm_venet.o
+endif
+bcm_venet-objs := bcmvenet.o
+
+#-DDUMP_DATA  -- dump data
+#-DUSE_BH     -- use bottom half
+#-DUSE_PROC   -- display ethernet driver internal info
+#-DUSE_EMAC   -- need MDC/MDIO functions
+
+EXTRA_CFLAGS += -DUSE_EMAC
+EXTRA_CFLAGS += -DUSE_BH
+EXTRA_CFLAGS += -DEXPORT_SYMTAB
+EXTRA_CFLAGS += -DUSE_PROC
+#EXTRA_CFLAGS += -DDUMP_TRACE
+#EXTRA_CFLAGS += -DDUMP_DATA
+#EXTRA_CFLAGS += -DRX_POLL
+
+EXTRA_CFLAGS += -I$(obj) -I$(obj)/../shared
+EXTRA_CFLAGS += -I$(obj)/../../fpm/impl$(CONFIG_BCM_FPM_IMPL)
+EXTRA_CFLAGS += -I$(obj)/../../dqm/impl$(CONFIG_BCM_DQM_IMPL)
+EXTRA_CFLAGS += -I$(INC_BRCMDRIVER_PUB_PATH)/$(BRCM_BOARD)
+EXTRA_CFLAGS += -I$(INC_BRCMDRIVER_PRIV_PATH)/$(BRCM_BOARD)
+EXTRA_CFLAGS += -I$(INC_BRCMBOARDPARMS_PATH)/$(BRCM_BOARD)
+EXTRA_CFLAGS += -I$(INC_BRCMSHARED_PUB_PATH)/$(BRCM_BOARD)
+EXTRA_CFLAGS += -I$(INC_BRCMSHARED_PRIV_PATH)/$(BRCM_BOARD)
+ifneq ($(strip $(CONFIG_BCM93383)),)
+EXTRA_CFLAGS += -I$(INC_BRCMSHARED_PRIV_PATH)/$(BRCM_BOARD)/bcm3383
+endif
+ifneq ($(strip $(CONFIG_BCM3384)),)
+EXTRA_CFLAGS += -I$(INC_BRCMSHARED_PRIV_PATH)/$(BRCM_BOARD)/bcm3384
+endif
+EXTRA_CFLAGS += -I$(INC_BRCMSHARED_PRIV_PATH)/$(BRCM_BOARD)/ioproc/iop_common/include
+EXTRA_CFLAGS += -I$(INC_BRCMSHARED_PRIV_PATH)/$(BRCM_BOARD)/ioproc/dtp 
+EXTRA_CFLAGS += -I$(INC_BRCMSHARED_PRIV_PATH)/$(BRCM_BOARD)/ioproc/fap
+EXTRA_CFLAGS += -I$(INC_BRCMSHARED_PRIV_PATH)/$(BRCM_BOARD)/ioproc/mpeg_proc
+EXTRA_CFLAGS += -I$(INC_BRCMSHARED_PRIV_PATH)/$(BRCM_BOARD)/ioproc/msg_proc
+EXTRA_CFLAGS += -I$(INC_BRCMSHARED_PRIV_PATH)/$(BRCM_BOARD)/ioproc/utp
+EXTRA_CFLAGS += -I$(INC_BRCMDRIVER_PRIV_PATH)/
+EXTRA_CFLAGS += -I$(INC_ITC_RPC_PATH)
+EXTRA_CFLAGS += -I$(INC_RPC_SERVICES_PATH)
+
+-include $(TOPDIR)/Rules.make
+
+clean:
+	rm -f core *.o *.a *.s

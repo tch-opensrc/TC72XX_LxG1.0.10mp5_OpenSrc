@@ -1,0 +1,16 @@
+<?xml version="1.0" standalone='no'?><!--*-nxml-*-->
+<!DOCTYPE service-group SYSTEM "avahi-service.dtd">
+<!--
+Avahi service definition file for advertising router web interface
+-->
+<!-- See avahi.service(5) for more information about this configuration file -->
+
+<service-group>
+    <name replace-wildcards="no">Router Admin Webif</name>
+    <service>
+        <host-name>router.local</host-name>
+        <type>_http._tcp</type>
+        <port>80</port>
+        <txt-record>product=Broadcom CableModem</txt-record>
+    </service>
+</service-group>

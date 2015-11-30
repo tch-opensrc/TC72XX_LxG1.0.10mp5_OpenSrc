@@ -1,0 +1,30 @@
+# -*-Shell-script-*-
+#
+# functions	This file contains functions to be used by most or all
+#		shell scripts in the /usr/local/etc/init.d directory.
+#
+
+echo_success() {
+  echo -n "[  OK  ]"
+  echo -ne "\n"
+  return 0
+}
+
+echo_failure() {
+  echo -n "[FAILED]"
+  echo -ne "\n"
+  return 1
+}
+
+echo_passed() {
+  echo -n "[PASSED]"
+  echo -ne "\n"
+  return 1
+}
+
+echo_warning() {
+  echo -n "[WARNING]"
+  echo -ne "\n"
+  return 1
+}
+

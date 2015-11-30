@@ -1,0 +1,4 @@
+# /etc/profile: system-wide .profile file for the Bourne shells
+
+export PATH=/opt/bin:/opt/scripts:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
+export LD_LIBRARY_PATH=/lib/public:/lib/private:/lib/gpl:/lib:/usr/local/lib

@@ -1,0 +1,260 @@
+# Kernel and Driver configuration for Broadcom Commengine ADSL board
+choice
+	prompt "Broadcom CM Ref board"
+	depends on MIPS_BRCM
+	default BCM93383
+	help
+	  Select Broadcom CM Ref board
+
+config BCM93380
+    bool "93380 LRG board"
+	select SYS_SUPPORTS_SMP
+	select DMA_NONCOHERENT
+	select NR_CPUS_DEFAULT_2
+	select BRCM_DCACHE_SHARED
+	select SYS_HAS_CPU_MIPS32_R1
+	select CSRC_R4K
+
+config BCM93383 
+    bool "93383 board"
+	select SYS_SUPPORTS_SMP
+	select DMA_NONCOHERENT
+	select NR_CPUS_DEFAULT_2
+	select BRCM_DCACHE_SHARED
+	select SYS_HAS_CPU_MIPS32_R2
+	select CSRC_R4K
+
+config BCM3384
+    bool "3384 board"
+    	 select HAVE_BCM_DECT_DRIVER
+
+config BCM3385
+    bool "3385 board"
+	select BMIPS4350
+
+endchoice
+
+choice
+	prompt "Broadcom CPU"
+	help
+	  Select Target CPU
+config BMIPS5000
+	bool "Zephyr core"
+	depends on BCM3384
+	select SYS_HAS_CPU_MIPS32_R1
+	select BRCM_CPU_DIV
+	select BRCM_ZSCM_L2
+	select BRCM_DCACHE_SHARED
+	select SYS_SUPPORTS_SMP
+	select SYS_SUPPORTS_HIGHMEM
+	select CPU_SUPPORTS_HIGHMEM
+	select DMA_NONCOHERENT
+	select NR_CPUS_DEFAULT_2
+	select HOTPLUG_CPU
+	select SMP
+	select ZONE_DMA
+
+config BMIPS4350
+	bool "Viper core"
+	depends on BCM3380 || BCM3383 || BCM3384 || BCM3385
+	select SYS_HAS_CPU_MIPS32_R1
+	select SYS_SUPPORTS_SMP
+	select DMA_NONCOHERENT
+	select NR_CPUS_DEFAULT_2
+	select BRCM_DCACHE_SHARED
+	select CSRC_R4K
+
+endchoice
+
+config HAVE_BCM_DECT_DRIVER
+       bool
+
+config BCM_DECT_DRIVER
+	tristate "Support for DECT Driver"
+	depends on BCM3384 && HAVE_BCM_DECT_DRIVER && m
+	def_tristate m
+	
+config BCM_DECTSHIM
+	tristate "Support for DECT Shim Driver"
+	depends on BCM3384 && HAVE_BCM_DECT_DRIVER && BCM_DECT_DRIVER && m
+	def_tristate m	
+	
+config BRCM_DCACHE_SHARED
+	bool "Enable Shared D-Cache Support"
+	depends on SMP
+	default n
+
+config BCM_BOARD
+	bool "Support for Broadcom Board"
+	depends on BCM93380 || BCM93383
+
+config BCM_SERIAL
+	tristate "Support for Serial Port"
+	depends on BCM93380 || BCM93383 || BCM3384
+	select SERIAL_CORE
+	select SERIAL_CORE_CONSOLE
+
+config BCM_APROUTER
+   bool "Support for APRouter"
+   depends on BCM93383
+   default n
+
+config BCM_PKTFLOW
+	tristate "Support for Broadcom Packet Flow Cache"
+        depends on BCM93380
+	help
+		Say 'M' to include support for Broadcom Packet Flow Cache.
+		Static compile not supported.
+
+config BCM_LOT1
+	bool "Running Linux on Thread 1"
+	depends on BCM93380 || BCM93383 || BCM3384 || BCM3385
+
+config BCM_VECTOR
+	bool "Thread 1 has separate exception vectors"
+	depends on BCM93380 || BCM93383 || BCM3384 || BCM3385
+
+config BCM_T0_IDLE
+	bool "Running Linux on Thread 1 with T0 idle"
+	depends on BCM93380 && BCM_LOT1
+
+config BCM_UPPER_MEM
+	bool "Running Linux on Thread 1 in the upper half of memory"
+	depends on BCM93380 && BCM_LOT1 || BCM93383
+
+config BCM_IOP
+	tristate "Support for 3380 I/O processors"
+	depends on BCM93380 || BCM93383 || BCM3384 || BCM3385
+
+config BCM_IOPLIB
+	bool "Support for 3380 I/O processors library"
+	depends on BCM93380 || BCM93383 || BCM3384
+
+config BCM_DQM
+	tristate "Support for 338x DQMs"
+	depends on BCM93380 || BCM93383 || BCM3384 || BCM3385
+
+config BCM_FPM
+	tristate "Support for 3380 free pool managert"
+	depends on BCM93380 || BCM93383 || BCM3384 || BCM3385
+
+config BCM_VENET
+	tristate "Support for Virtual Ethernet between TPs"
+	depends on BCM93380 || BCM93383 || BCM3384 || BCM3385
+
+config BCM_VFLASH
+	bool "Support for Virtual Flash"
+	depends on BCM93380 || BCM93383 || BCM3384
+	default y if BCM93380
+	default y if BCM93383
+	default y if BCM93384
+	default n if BCM93385
+
+config BCM_VNIHAL
+	tristate "Support for Virtual NI HALs between TPs"
+	depends on (BCM93383 || BCM3384) && BCM_APROUTER
+
+config BCM_ITCRPC
+	bool "Support for low level ITC/RPC between OSes"
+	depends on BCM93380 || BCM93383 || BCM3384 || BCM3385
+
+config BCM_PLATFORM_DEVS
+    tristate "Support for platform devices, ie, BCM USB Host"
+    depends on BCM93380 || BCM93383 || BCM3384
+    
+config BCM_USB_HOST
+    tristate "Support for USB Host"
+    depends on BCM93380 || BCM93383 || BCM3384 || BCM_PLATFORM_DEVS
+
+config BCM_BOARD_IMPL
+	int "Implementation index for ADSL Board"
+	depends on BCM93380 || BCM93383
+
+config BCM_SERIAL_IMPL
+	int "Implementation index for Serial"
+	depends on BCM93380 || BCM93383 || BCM3384 || BCM3385
+
+config BCM_PKTFLOW_IMPL
+	int "Implementation index for Broadcom Flow Cache"
+	depends on BCM93380
+
+config BCM_IOP_IMPL
+	int "Implementation index for IOP"
+	depends on BCM93380 || BCM93383 || BCM3384 || BCM3385
+
+config BCM_DQM_IMPL
+	int "Implementation index for DQM"
+	depends on BCM93380 || BCM93383 || BCM3384 || BCM3385
+
+config BCM_FPM_IMPL
+	int "Implementation index for FPM"
+	depends on BCM93380 || BCM93383 || BCM3384  || BCM3385
+
+config BCM_VENET_IMPL
+	int "Implementation index for Virtual Ethernet"
+	depends on BCM93380 || BCM93383 || BCM3384 || BCM3385
+
+config BCM_VNIHAL_IMPL
+	int "Implementation index for Virtual NI HALs between TPs"
+	depends on (BCM93383 || BCM3384) && BCM_APROUTER
+
+config BCM_USB_HOST_IMPL
+    	int "Implementation index for USB Host"
+    	depends on BCM93380 || BCM93383 || BCM3384
+
+choice
+	prompt "Root File System"
+	depends on MIPS_BRCM
+	help
+	  Select root file system on the board flash. 
+
+config ROOTFS_SQUASHFS
+        bool "SQUASHFS"
+config ROOTFS_CRAMFS
+        bool "CRAMFS"
+config ROOTFS_UBIFS
+        bool "UBIFS"
+config ROOTFS_JFFS2
+        bool "JFFS2"
+config ROOTFS_NFS
+        bool "NFS"
+config ROOTFS_INITRD
+        bool "INITRD"
+	select BLK_DEV_INITRD
+
+endchoice
+
+config ROOT_FLASHFS
+	string "flash partition"
+	depends on ROOTFS_SQUASHFS || ROOTFS_CRAMFS || ROOTFS_JFFS2 || ROOTFS_UBIFS
+	default "root=31:0 ro noinitrd" if ROOTFS_SQUASHFS = y || ROOTFS_CRAMFS = y
+	default "root=31:0 rw rootfstype=jffs2" if ROOTFS_JFFS2 = y
+	default "root=ubi0:rootfs rootfstype=ubifs" if ROOTFS_UBIFS = y
+	help
+	  This is the root file system partition on flash memory
+
+config ROOT_NFS_DIR
+	string "NFS server path"
+	depends on ROOTFS_NFS
+	default "/opt/bcm96362/targets/96362GW/fs"
+	help
+	  This is the path of NFS server (host system)
+
+config BRCM_ZSCM_L2
+	bool
+	select MIPS_CPU_SCACHE
+
+config EARLIER_THAN_EARLY_PRINTK
+	bool
+
+config BRCM_PERF_TEST
+	bool "BRCM chip performance test"
+	depends on BCM93380 || BCM93383 || BCM3384
+
+config MIPS_BRCM_TEXT
+       hex
+       default "0x84010000" if BCM93380
+       default "0x84010000" if BCM93383
+       default "0x80000000" if BCM3384 && BMIPS5000
+       default "0x87000000" if BCM3384 && BMIPS4350
+       default "0x81701000" if BCM3385 && BMIPS4350

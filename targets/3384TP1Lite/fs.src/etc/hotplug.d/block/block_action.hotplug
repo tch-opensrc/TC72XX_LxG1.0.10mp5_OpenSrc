@@ -1,0 +1,27 @@
+#!/bin/sh
+
+if [ -p /var/tmp/smbapp_hotplug_fifo ]; then
+    echo "$ACTION $DEVTYPE $MAJOR $MINOR $DEVPATH" >> /var/tmp/smbapp_hotplug_fifo
+    smbappid=`pidof smbapp | cut -f 1 -d ' '`
+    if [ -n $smbappid ]; then
+	kill -SIGUSR1 $smbappid
+    fi
+fi
+
+# if [ $ACTION = "remove" ]; then
+#     dev=`basename $DEVPATH | egrep "sd[a-z]"`
+#     if [ -n "$dev" ]; then
+#         dir=`mount | grep $dev | cut -f 3 -d ' '`
+# 	if [ -d $dir ]; then
+# 	    echo "Unmounting $dir" >> /dev/ttyS0
+#             umount $dir
+#             mscapppid=`pidof mscapp | cut -f 1 -d ' '`
+#             if [ -n "mscapppid" ]; then
+#             # Tell the mscapp to rescan, it will tell the DLNA server to rescan if it is running
+# 		echo "Tell MSCAPP to tell DLNA to Rescan" >> /dev/ttyS0
+# 		kill -SIGUSR1 $mscapppid
+#             fi
+# 	    rmdir $dir
+# 	fi
+#     fi
+# fi

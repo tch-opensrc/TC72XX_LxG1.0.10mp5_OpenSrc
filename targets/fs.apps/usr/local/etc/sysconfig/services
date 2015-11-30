@@ -1,0 +1,5 @@
+HTTP=yes
+DBUS=yes
+AVAHI=yes
+FIREFLY=no
+CUPS=no

@@ -1,0 +1,5 @@
+::sysinit:/etc/init.d/rcS
+#::respawn:-/bin/sh
+#::respawn:smbapp 2>&1  | logger -s -t smbapp | echo "Starting SmpApp"
+::respawn:smbapp 
+#::ctrlaltdel:/bin/umount -a -r

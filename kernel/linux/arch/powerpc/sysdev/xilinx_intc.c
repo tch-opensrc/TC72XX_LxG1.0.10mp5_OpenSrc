@@ -1,0 +1,254 @@
+/*
+ * Interrupt controller driver for Xilinx Virtex FPGAs
+ *
+ * Copyright (C) 2007 Secret Lab Technologies Ltd.
+ *
+ * This file is licensed under the terms of the GNU General Public License
+ * version 2. This program is licensed "as is" without any warranty of any
+ * kind, whether express or implied.
+ *
+ */
+
+/*
+ * This is a driver for the interrupt controller typically found in
+ * Xilinx Virtex FPGA designs.
+ *
+ * The interrupt sense levels are hard coded into the FPGA design with
+ * typically a 1:1 relationship between irq lines and devices (no shared
+ * irq lines).  Therefore, this driver does not attempt to handle edge
+ * and level interrupts differently.
+ */
+#undef DEBUG
+
+#include <linux/kernel.h>
+#include <linux/irq.h>
+#include <linux/of.h>
+#include <asm/io.h>
+#include <asm/processor.h>
+#include <asm/irq.h>
+
+/*
+ * INTC Registers
+ */
+#define XINTC_ISR	0	/* Interrupt Status */
+#define XINTC_IPR	4	/* Interrupt Pending */
+#define XINTC_IER	8	/* Interrupt Enable */
+#define XINTC_IAR	12	/* Interrupt Acknowledge */
+#define XINTC_SIE	16	/* Set Interrupt Enable bits */
+#define XINTC_CIE	20	/* Clear Interrupt Enable bits */
+#define XINTC_IVR	24	/* Interrupt Vector */
+#define XINTC_MER	28	/* Master Enable */
+
+static struct irq_host *master_irqhost;
+
+#define XILINX_INTC_MAXIRQS	(32)
+
+/* The following table allows the interrupt type, edge or level,
+ * to be cached after being read from the device tree until the interrupt
+ * is mapped
+ */
+static int xilinx_intc_typetable[XILINX_INTC_MAXIRQS];
+
+/* Map the interrupt type from the device tree to the interrupt types
+ * used by the interrupt subsystem
+ */
+static unsigned char xilinx_intc_map_senses[] = {
+	IRQ_TYPE_EDGE_RISING,
+	IRQ_TYPE_EDGE_FALLING,
+	IRQ_TYPE_LEVEL_HIGH,
+	IRQ_TYPE_LEVEL_LOW,
+};
+
+/*
+ * The interrupt controller is setup such that it doesn't work well with
+ * the level interrupt handler in the kernel because the handler acks the
+ * interrupt before calling the application interrupt handler. To deal with
+ * that, we use 2 different irq chips so that different functions can be
+ * used for level and edge type interrupts.
+ *
+ * IRQ Chip common (across level and edge) operations
+ */
+static void xilinx_intc_mask(unsigned int virq)
+{
+	int irq = virq_to_hw(virq);
+	void * regs = get_irq_chip_data(virq);
+	pr_debug("mask: %d\n", irq);
+	out_be32(regs + XINTC_CIE, 1 << irq);
+}
+
+static int xilinx_intc_set_type(unsigned int virq, unsigned int flow_type)
+{
+	struct irq_desc *desc = get_irq_desc(virq);
+
+	desc->status &= ~(IRQ_TYPE_SENSE_MASK | IRQ_LEVEL);
+	desc->status |= flow_type & IRQ_TYPE_SENSE_MASK;
+	if (flow_type & (IRQ_TYPE_LEVEL_HIGH | IRQ_TYPE_LEVEL_LOW))
+		desc->status |= IRQ_LEVEL;
+	return 0;
+}
+
+/*
+ * IRQ Chip level operations
+ */
+static void xilinx_intc_level_unmask(unsigned int virq)
+{
+	int irq = virq_to_hw(virq);
+	void * regs = get_irq_chip_data(virq);
+	pr_debug("unmask: %d\n", irq);
+	out_be32(regs + XINTC_SIE, 1 << irq);
+
+	/* ack level irqs because they can't be acked during
+	 * ack function since the handle_level_irq function
+	 * acks the irq before calling the inerrupt handler
+	 */
+	out_be32(regs + XINTC_IAR, 1 << irq);
+}
+
+static struct irq_chip xilinx_intc_level_irqchip = {
+	.typename = "Xilinx Level INTC",
+	.mask = xilinx_intc_mask,
+	.mask_ack = xilinx_intc_mask,
+	.unmask = xilinx_intc_level_unmask,
+	.set_type = xilinx_intc_set_type,
+};
+
+/*
+ * IRQ Chip edge operations
+ */
+static void xilinx_intc_edge_unmask(unsigned int virq)
+{
+	int irq = virq_to_hw(virq);
+	void *regs = get_irq_chip_data(virq);
+	pr_debug("unmask: %d\n", irq);
+	out_be32(regs + XINTC_SIE, 1 << irq);
+}
+
+static void xilinx_intc_edge_ack(unsigned int virq)
+{
+	int irq = virq_to_hw(virq);
+	void * regs = get_irq_chip_data(virq);
+	pr_debug("ack: %d\n", irq);
+	out_be32(regs + XINTC_IAR, 1 << irq);
+}
+
+static struct irq_chip xilinx_intc_edge_irqchip = {
+	.typename = "Xilinx Edge  INTC",
+	.mask = xilinx_intc_mask,
+	.unmask = xilinx_intc_edge_unmask,
+	.ack = xilinx_intc_edge_ack,
+	.set_type = xilinx_intc_set_type,
+};
+
+/*
+ * IRQ Host operations
+ */
+
+/**
+ * xilinx_intc_xlate - translate virq# from device tree interrupts property
+ */
+static int xilinx_intc_xlate(struct irq_host *h, struct device_node *ct,
+				u32 *intspec, unsigned int intsize,
+				irq_hw_number_t *out_hwirq,
+				unsigned int *out_flags)
+{
+	if ((intsize < 2) || (intspec[0] >= XILINX_INTC_MAXIRQS))
+		return -EINVAL;
+
+	/* keep a copy of the interrupt type til the interrupt is mapped
+	 */
+	xilinx_intc_typetable[intspec[0]] = xilinx_intc_map_senses[intspec[1]];
+
+	/* Xilinx uses 2 interrupt entries, the 1st being the h/w
+	 * interrupt number, the 2nd being the interrupt type, edge or level
+	 */
+	*out_hwirq = intspec[0];
+	*out_flags = xilinx_intc_map_senses[intspec[1]];
+
+	return 0;
+}
+static int xilinx_intc_map(struct irq_host *h, unsigned int virq,
+				  irq_hw_number_t irq)
+{
+	set_irq_chip_data(virq, h->host_data);
+
+	if (xilinx_intc_typetable[irq] == IRQ_TYPE_LEVEL_HIGH ||
+	    xilinx_intc_typetable[irq] == IRQ_TYPE_LEVEL_LOW) {
+		set_irq_chip_and_handler(virq, &xilinx_intc_level_irqchip,
+			handle_level_irq);
+	} else {
+		set_irq_chip_and_handler(virq, &xilinx_intc_edge_irqchip,
+			handle_edge_irq);
+	}
+	return 0;
+}
+
+static struct irq_host_ops xilinx_intc_ops = {
+	.map = xilinx_intc_map,
+	.xlate = xilinx_intc_xlate,
+};
+
+struct irq_host * __init
+xilinx_intc_init(struct device_node *np)
+{
+	struct irq_host * irq;
+	struct resource res;
+	void * regs;
+	int rc;
+
+	/* Find and map the intc registers */
+	rc = of_address_to_resource(np, 0, &res);
+	if (rc) {
+		printk(KERN_ERR __FILE__ ": of_address_to_resource() failed\n");
+		return NULL;
+	}
+	regs = ioremap(res.start, 32);
+
+	printk(KERN_INFO "Xilinx intc at 0x%08llx mapped to 0x%p\n",
+		(unsigned long long) res.start, regs);
+
+	/* Setup interrupt controller */
+	out_be32(regs + XINTC_IER, 0); /* disable all irqs */
+	out_be32(regs + XINTC_IAR, ~(u32) 0); /* Acknowledge pending irqs */
+	out_be32(regs + XINTC_MER, 0x3UL); /* Turn on the Master Enable. */
+
+	/* Allocate and initialize an irq_host structure. */
+	irq = irq_alloc_host(np, IRQ_HOST_MAP_LINEAR, XILINX_INTC_MAXIRQS,
+			     &xilinx_intc_ops, -1);
+	if (!irq)
+		panic(__FILE__ ": Cannot allocate IRQ host\n");
+	irq->host_data = regs;
+	return irq;
+}
+
+int xilinx_intc_get_irq(void)
+{
+	void * regs = master_irqhost->host_data;
+	pr_debug("get_irq:\n");
+	return irq_linear_revmap(master_irqhost, in_be32(regs + XINTC_IVR));
+}
+
+void __init xilinx_intc_init_tree(void)
+{
+	struct device_node *np;
+
+	/* find top level interrupt controller */
+	for_each_compatible_node(np, NULL, "xlnx,opb-intc-1.00.c") {
+		if (!of_get_property(np, "interrupts", NULL))
+			break;
+	}
+	if (!np) {
+		for_each_compatible_node(np, NULL, "xlnx,xps-intc-1.00.a") {
+			if (!of_get_property(np, "interrupts", NULL))
+				break;
+		}
+	}
+
+	/* xilinx interrupt controller needs to be top level */
+	BUG_ON(!np);
+
+	master_irqhost = xilinx_intc_init(np);
+	BUG_ON(!master_irqhost);
+
+	irq_set_default_host(master_irqhost);
+	of_node_put(np);
+}

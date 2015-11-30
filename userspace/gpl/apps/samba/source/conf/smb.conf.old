@@ -1,0 +1,52 @@
+#
+# Samba configuration script for Broadcom Linux Gateway
+#
+
+#======================= Global Settings =======================
+
+[global]
+
+# workgroup/NT-domain name your Samba server is part of
+  workgroup = mygroup
+
+# server string is the equivalent of the NT Description field
+  netbios name = brcm-hebo
+  server string = DSL Gateway
+
+# This will prevent nmbd to search for NetBIOS names through DNS.
+  dns proxy = no
+
+# Local Master setings
+  domain master = no
+  local master = Yes
+  preferred master = Yes
+  os level = 35
+
+# Put a capping on the size of the log files (in Kb).
+#	log level = 3 smb:10 rpc_parse:10 rpc_srv:10 rpc_cli:10 auth:10 winbind:10 vfs:10
+  log level = 0
+  log file = /tmp/smbvar/logsamba.%m
+  max log size = 10
+   smb passwd file = /etc/samba/smbpasswd
+
+# The specific set of interfaces / networks to bind to
+  interfaces = 192.168.1.1/255.255.255.0
+
+# Obvious thing   
+  load printers = no
+  
+# security settings
+	security = user
+	encrypt passwords =yes
+
+# Performance related settings
+	socket options = TCP_NODELAY SO_RCVBUF=8192 SO_SNDBUF=8192
+
+#======================= Share Definitions =======================
+# USB Key folder
+[usbkey]
+	comment = usbpath
+	valid users = admin support user nobody
+	writable = yes
+	path = /mnt
+#	guest ok = yes

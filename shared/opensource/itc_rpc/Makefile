@@ -1,0 +1,13 @@
+obj-$(CONFIG_BCM_ITCRPC)	+= itc_msg_q.o  itc_rpc.o itc_user.o
+
+EXTRA_CFLAGS += -DCONFIG_BCM9$(BRCM_CHIP)
+EXTRA_CFLAGS += -I$(INC_BRCMDRIVER_PUB_PATH)/$(BRCM_BOARD)
+EXTRA_CFLAGS += -I$(INC_BRCMSHARED_PUB_PATH)/$(BRCM_BOARD)
+ifneq ($(strip $(CONFIG_BCM_IOP)),)
+EXTRA_CFLAGS += -I$(BRCMDRIVERS_DIR)/broadcom/net/iop/impl2
+endif
+ifneq ($(strip $(CONFIG_BCM_DQM)),)
+EXTRA_CFLAGS += -I$(BRCMDRIVERS_DIR)/broadcom/net/dqm/impl$(CONFIG_BCM_DQM_IMPL)
+endif
+EXTRA_CFLAGS += -I$(INC_BRCMSHARED_PRIV_PATH)/$(BRCM_BOARD)/ioproc/iop_common/include
+EXTRA_CFLAGS += -I$(INC_BRCMSHARED_PRIV_PATH)/$(BRCM_BOARD)/ioproc/utp

@@ -1,0 +1,16 @@
+#!/bin/sh
+logger -t $ACTION $DEVTYPE $MAJOR $MINOR $DEVPATH
+if [ $ACTION = "add" ]; then
+    dev=`basename $DEVPATH`
+    if [ -e /dev/$dev ]; then
+        echo "Starting getty on: " $dev
+        /sbin/getty-start 115200 $dev 
+    fi
+fi
+
+if [ $ACTION = "remove" ]; then
+    dev=`basename $DEVPATH`
+    if [ -e /dev/$dev ]; then
+        /sbin/getty-stop $dev
+    fi
+fi

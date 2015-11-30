@@ -1,0 +1,7 @@
+proc		/proc	proc	defaults	0	0
+tmpfs		/var	tmpfs	size=16384k	0	0
+/dev/sda1	/mnt	vfat	noauto		0	0
+tmpfs		/mnt	tmpfs	size=16k	0	0
+sysfs		/sys	sysfs	defaults	0	0
+tmpfs		/root	tmpfs	size=4k		0	0
+

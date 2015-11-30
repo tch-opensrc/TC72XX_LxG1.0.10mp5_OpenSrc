@@ -1,0 +1,1550 @@
+This is zebra.info, produced by makeinfo version 4.0b from zebra.texi.
+
+INFO-DIR-SECTION Routing Software:
+START-INFO-DIR-ENTRY
+* Zebra: (zebra).		The GNU Zebra routing software
+END-INFO-DIR-ENTRY
+
+   This file documents the GNU Zebra software which manages common
+TCP/IP routing protocols.
+
+   This is Edition 0.1, last updated 28 June 2002 of `The GNU Zebra
+Manual', for Zebra Version 0.93.
+
+   Copyright (C) 1999, 2000, 2001, 2002 Kunihiro Ishiguro
+
+   Permission is granted to make and distribute verbatim copies of this
+manual provided the copyright notice and this permission notice are
+preserved on all copies.
+
+   Permission is granted to copy and distribute modified versions of
+this manual under the conditions for verbatim copying, provided that the
+entire resulting derived work is distributed under the terms of a
+permission notice identical to this one.
+
+   Permission is granted to copy and distribute translations of this
+manual into another language, under the above conditions for modified
+versions, except that this permission notice may be stated in a
+translation approved by Kunihiro Ishiguro.
+
+
+File: zebra.info,  Node: Top,  Next: Overview,  Prev: (dir),  Up: (dir)
+
+Zebra
+*****
+
+   Zebra is a advanced routing software package that provides TCP/IP
+based routing protocols.  This is the Zebra Manual for zebra-0.93.
+
+* Menu:
+
+* Overview::
+* Installation::
+* Basic commands::
+* zebra::
+* RIP::
+* RIPng::
+* OSPFv2::
+* OSPFv3::
+* BGP::
+* vtysh::
+* Filtering::
+* Route Map::
+* IPv6 Support::
+* Kernel Interface::
+* SNMP Support::
+* Zebra Protocol::
+* Packet Binary Dump Format::
+* Command Index::
+* VTY Key Index::
+
+
+File: zebra.info,  Node: Overview,  Next: Installation,  Prev: Top,  Up: Top
+
+Overview
+********
+
+   Zebra is a routing software package that provides TCP/IP based
+routing services with routing protocols support such as RIPv1, RIPv2,
+RIPng, OSPFv2, OSPFv3, BGP-4, and BGP-4+ (*note Supported RFC::).
+Zebra also supports special BGP Route Reflector and Route Server
+behavior.  In addition to traditional IPv4 routing protocols, Zebra
+also supports IPv6 routing protocols.  With SNMP daemon which supports
+SMUX protocol, Zebra provides routing protocol MIBs (*note SNMP
+Support::).
+
+   Zebra uses an advanced software architecture to provide you with a
+high quality, multi server routing engine.  Zebra has an interactive
+user interface for each routing protocol and supports common client
+commands.  Due to this design, you can add new protocol daemons to Zebra
+easily.  You can use Zebra library as your program's client user
+interface.
+
+   Zebra is an official GNU software and distributed under the GNU
+General Public License.
+
+* Menu:
+
+* About Zebra::                 Basic information about Zebra
+* System Architecture::         The Zebra system architecture
+* Supported Platforms::         Supported platforms and future plans
+* Supported RFC::               Supported RFCs
+* How to get Zebra::
+* Mailing List::                Mailing list information
+* Bug Reports::                 Mail address for bug data
+
+
+File: zebra.info,  Node: About Zebra,  Next: System Architecture,  Prev: Overview,  Up: Overview
+
+About Zebra
+===========
+
+   Today, TCP/IP networks are covering all of the world.  The Internet
+has been deployed in many countries, companies, and to the home.  When
+you connect to the Internet your packet will pass many routers which
+have TCP/IP routing functionality.
+
+   A system with Zebra installed acts as a dedicated router.  With
+Zebra, your machine exchanges routing information with other routers
+using routing protocols.  Zebra uses this information to update the
+kernel routing table so that the right data goes to the right place.
+You can dynamically change the configuration and you may view routing
+table information from the Zebra terminal interface.
+
+   Adding to routing protocol support, Zebra can setup interface's
+flags, interface's address, static routes and so on.  If you have a
+small network, or a stub network, or xDSL connection, configuring the
+Zebra routing software is very easy.  The only thing you have to do is
+to set up the interfaces and put a few commands about static routes
+and/or default routes.  If the network is rather large, or if the
+network structure changes frequently, you will want to take advantage
+of Zebra's dynamic routing protocol support for protocols such as RIP,
+OSPF or BGP.  Zebra is with you.
+
+   Traditionally, UNIX based router configuration is done by `ifconfig'
+and `route' commands.  Status of routing table is displayed by
+`netstat' utility.  Almost of these commands work only if the user has
+root privileges.  Zebra has a different system administration method.
+There are two user modes in Zebra.  One is normal mode, the other is
+enable mode.  Normal mode user can only view system status, enable mode
+user can change system configuration.  This UNIX account independent
+feature will be great help to the router administrator.
+
+   Currently, Zebra supports common unicast routing protocols.
+Multicast routing protocols such as BGMP, PIM-SM, PIM-DM will be
+supported in Zebra 2.0.  MPLS support is going on.  In the future,
+TCP/IP filtering control, QoS control, diffserv configuration will be
+added to Zebra.  Zebra project's final goal is making a productive,
+quality free TCP/IP routing software.
+
+
+File: zebra.info,  Node: System Architecture,  Next: Supported Platforms,  Prev: About Zebra,  Up: Overview
+
+System Architecture
+===================
+
+   Traditional routing software is made as a one process program which
+provides all of the routing protocol functionalities.  Zebra takes a
+different approach.  It is made from a collection of several daemons
+that work together to build the routing table.  There may be several
+protocol-specific routing daemons and zebra the kernel routing manager.
+
+   The `ripd' daemon handles the RIP protocol, while `ospfd' is a
+daemon which supports OSPF version 2.  `bgpd' supports the BGP-4
+protocol.  For changing the kernel routing table and for redistribution
+of routes between different routing protocols, there is a kernel
+routing table manager `zebra' daemon.  It is easy to add a new routing
+protocol daemons to the entire routing system without affecting any
+other software.  You need to run only the protocol daemon associated
+with routing protocols in use.  Thus, user may run a specific daemon
+and send routing reports to a central routing console.
+
+   There is no need for these daemons to be running on the same machine.
+You can even run several same protocol daemons on the same machine.
+This architecture creates new possibilities for the routing system.
+
+     +----+  +----+  +-----+  +-----+
+     |bgpd|  |ripd|  |ospfd|  |zebra|
+     +----+  +----+  +-----+  +-----+
+                                 |
+     +---------------------------|--+
+     |                           v  |
+     |  UNIX Kernel  routing table  |
+     |                              |
+     +------------------------------+
+     
+         Zebra System Architecture
+
+   Multi-process architecture brings extensibility, modularity and
+maintainability.  At the same time it also brings many configuration
+files and terminal interfaces.  Each daemon has it's own configuration
+file and terminal interface.  When you configure a static route, it must
+be done in `zebra' configuration file.  When you configure BGP network
+it must be done in `bgpd' configuration file.  This can be a very
+annoying thing.  To resolve the problem, Zebra provides integrated user
+interface shell called `vtysh'.  `vtysh' connects to each daemon with
+UNIX domain socket and then works as a proxy for user input.
+
+   Zebra was planned to use multi-threaded mechanism when it runs with a
+kernel that supports multi-threads.  But at the moment, the thread
+library which comes with GNU/Linux or FreeBSD has some problems with
+running reliable services such as routing software, so we don't use
+threads at all.  Instead we use the `select(2)' system call for
+multiplexing the events.
+
+   When `zebra' runs under a GNU Hurd kernel it will act as a kernel
+routing table itself.  Under GNU Hurd, all TCP/IP services are provided
+by user processes called `pfinet'.  Zebra will provide all the routing
+selection mechanisms for the process.  This feature will be implemented
+when GNU Hurd becomes stable.
+
+
+File: zebra.info,  Node: Supported Platforms,  Next: Supported RFC,  Prev: System Architecture,  Up: Overview
+
+Supported Platforms
+===================
+
+   Currently Zebra supports GNU/Linux, BSD and Solaris.  Below is a list
+of OS versions on which Zebra runs.  Porting Zebra to other platforms is
+not so too difficult.  Platform dependent codes exist only in `zebra'
+daemon.  Protocol daemons are platform independent.  Please let us know
+when you find out Zebra runs on a platform which is not listed below.
+
+
+   * GNU/Linux 2.0.37
+
+   * GNU/Linux 2.2.x
+
+   * GNU/Linux 2.3.x
+
+   * FreeBSD 2.2.8
+
+   * FreeBSD 3.x
+
+   * FreeBSD 4.x
+
+   * NetBSD 1.4
+
+   * OpenBSD 2.5
+
+   * Solaris 2.6
+
+   * Solaris 7
+
+
+   Some IPv6 stacks are in development.  Zebra supports following IPv6
+stacks.  For BSD, we recommend KAME IPv6 stack.  Solaris IPv6 stack is
+not yet supported.
+
+
+   * Linux IPv6 stack for GNU/Linux 2.2.x and higher.
+
+   * KAME IPv6 stack for BSD.
+
+   * INRIA IPv6 stack for BSD.
+
+
+File: zebra.info,  Node: Supported RFC,  Next: How to get Zebra,  Prev: Supported Platforms,  Up: Overview
+
+Supported RFC
+=============
+
+   Below is the list of currently supported RFC's.
+
+RFC1058
+     `Routing Information Protocol. C.L. Hedrick. Jun-01-1988.'
+
+RF2082
+     `RIP-2 MD5 Authentication. F. Baker, R. Atkinson. January 1997.'
+
+RFC2453
+     `RIP Version 2. G. Malkin. November 1998.'
+
+RFC2080
+     `RIPng for IPv6. G. Malkin, R. Minnear. January 1997.'
+
+RFC2328
+     `OSPF Version 2. J. Moy. April 1998.'
+
+RFC2740
+     `OSPF for IPv6. R. Coltun, D. Ferguson, J. Moy. December 1999.'
+
+RFC1771
+     `A Border Gateway Protocol 4 (BGP-4). Y. Rekhter & T. Li. March
+     1995.'
+
+RFC1965
+     `Autonomous System Confederations for BGP. P. Traina. June 1996.'
+
+RFC1997
+     `BGP Communities Attribute. R. Chandra, P. Traina & T. Li. August
+     1996.'
+
+RFC2545
+     `Use of BGP-4 Multiprotocol Extensions for IPv6 Inter-Domain
+     Routing. P. Marques, F. Dupont. March 1999.'
+
+RFC2796
+     `BGP Route Reflection An alternative to full mesh IBGP. T. Bates &
+     R. Chandrasekeran. June 1996.'
+
+RFC2858
+     `Multiprotocol Extensions for BGP-4. T. Bates, Y. Rekhter, R.
+     Chandra, D. Katz. June 2000.'
+
+RFC2842
+     `Capabilities Advertisement with BGP-4. R. Chandra, J. Scudder.
+     May 2000.'
+
+   When SNMP support is enabled, below RFC is also supported.
+
+RFC1227
+     `SNMP MUX protocol and MIB. M.T. Rose. May-01-1991.'
+
+RFC1657
+     `Definitions of Managed Objects for the Fourth Version of the
+     Border Gateway Protocol (BGP-4) using SMIv2. S. Willis, J. Burruss,
+     J. Chu, Editor. July 1994.'
+
+RFC1724
+     `RIP Version 2 MIB Extension. G. Malkin & F. Baker. November 1994.'
+
+RFC1850
+     `OSPF Version 2 Management Information Base. F. Baker, R. Coltun.
+     November 1995.'
+
+
+File: zebra.info,  Node: How to get Zebra,  Next: Mailing List,  Prev: Supported RFC,  Up: Overview
+
+How to get Zebra
+================
+
+   Zebra is still beta software and there is no officially released
+version.  So currently Zebra is distributed from Zebra beta ftp site
+located at:
+
+   <ftp://ftp.zebra.org/pub/zebra>
+
+   Once Zebra is released you can get it from GNU FTP site and its
+mirror sites.  We are planning Zebra-1.0 as the first released version.
+
+   Zebra's official web page is located at:
+
+   <http://www.gnu.org/software/zebra/zebra.html>.
+
+   There is a Zebra beta tester web page at:
+
+   <http://www.zebra.org/>.
+
+   You can get the latest beta software information from this page.
+
+
+File: zebra.info,  Node: Mailing List,  Next: Bug Reports,  Prev: How to get Zebra,  Up: Overview
+
+Mailing List
+============
+
+   There is a mailing list for discussions about Zebra.  If you have any
+comments or suggestions to Zebra, please send mail to
+<zebra@zebra.org>.  New snapshot announcements, improvement notes, and
+patches are sent to the list.
+
+   To subscribe to the Zebra mailing list <zebra@zebra.org>, please
+send a mail to <majordomo@zebra.org> with a message body that includes
+only:
+
+     subscribe zebra
+
+   To unsubscribe from the list, please send a mail to
+<majordomo@zebra.org> with a message body that includes only:
+
+     unsubscribe zebra
+
+
+File: zebra.info,  Node: Bug Reports,  Prev: Mailing List,  Up: Overview
+
+Bug Reports
+===========
+
+   If you think you have found a bug, please send a bug report to
+<bug-zebra@gnu.org>.  When you send a bug report, please be careful
+about the points below.
+
+   * Please note what kind of OS you are using.  If you use the IPv6
+     stack please note that as well.
+
+   * Please show us the results of `netstat -rn' and `ifconfig -a'.
+     Information from zebra's VTY command `show ip route' will also be
+     helpful.
+
+   * Please send your configuration file with the report.  If you
+     specify arguments to the configure script please note that too.
+
+   Bug reports are very important for us to improve the quality of
+Zebra.  Zebra is still in the development stage, but please don't
+hesitate to send a bug report to <bug-zebra@gnu.org>.
+
+
+File: zebra.info,  Node: Installation,  Next: Basic commands,  Prev: Overview,  Up: Top
+
+Installation
+************
+
+   There are three steps for installing the software: configuration,
+compilation, and installation.
+
+* Menu:
+
+* Configure the Software::
+* Build the Software::
+* Install the Software::
+
+   The easiest way to get Zebra running is to issue the following
+commands:
+
+     % configure
+     % make
+     % make install
+
+
+File: zebra.info,  Node: Configure the Software,  Next: Build the Software,  Prev: Installation,  Up: Installation
+
+Configure the Software
+======================
+
+   Zebra has an excellent configure script which automatically detects
+most host configurations.  There are several additional configure
+options you can use to turn off IPv6 support, to disable the
+compilation of specific daemons, and to enable SNMP support.
+
+`--enable-guile'
+     Turn on compilation of the zebra-guile interpreter.  You will need
+     the guile library to make this.  zebra-guile implementation is not
+     yet finished.  So this option is only useful for zebra-guile
+     developers.
+
+`--disable-ipv6'
+     Turn off IPv6 related features and daemons.  Zebra configure script
+     automatically detects IPv6 stack.  But sometimes you might want to
+     disable IPv6 support of Zebra.
+
+`--disable-zebra'
+     Do not build zebra daemon.
+
+`--disable-ripd'
+     Do not build ripd.
+
+`--disable-ripngd'
+     Do not build ripngd.
+
+`--disable-ospfd'
+     Do not build ospfd.
+
+`--disable-ospf6d'
+     Do not build ospf6d.
+
+`--disable-bgpd'
+     Do not build bgpd.
+
+`--disable-bgp-announce'
+     Make `bgpd' which does not make bgp announcements at all.  This
+     feature is good for using `bgpd' as a BGP announcement listener.
+
+`--enable-netlink'
+     Force to enable GNU/Linux netlink interface.  Zebra configure
+     script detects netlink interface by checking a header file.  When
+     the header file does not match to the current running kernel,
+     configure script will not turn on netlink support.
+
+`--enable-snmp'
+     Enable SNMP support.  By default, SNMP support is disabled.
+
+   You may specify any combination of the above options to the configure
+script.  By default, the executables are placed in `/usr/local/sbin'
+and the configuration files in `/usr/local/etc'. The `/usr/local/'
+installation prefix and other directories may be changed using the
+following options to the configuration script.
+
+`--prefix=PREFIX'
+     Install architecture-independent files in PREFIX [/usr/local].
+
+`--sysconfdir=DIR'
+     Read-only sample configuration file in DIR [PREFIX/etc].
+
+     % ./configure --disable-ipv6
+
+   This command will configure zebra and the routing daemons.
+
+   There are several options available only to GNU/Linux systems: (1).
+
+   ---------- Footnotes ----------
+
+   (1) GNU/Linux has very flexible kernel configuration features.  If
+you use GNU/Linux, make sure that the current kernel configuration is
+what you want.  Zebra will run with any kernel configuration but some
+recommendations do exist.
+
+CONFIG_NETLINK
+     Kernel/User netlink socket.  This is a brand new feature which
+     enables an advanced interface between the Linux kernel and Zebra
+     (*note Kernel Interface::).
+
+CONFIG_RTNETLINK
+     Routing messages.  This makes it possible to receive netlink
+     routing messages.  If you specify this option, `zebra' can detect
+     routing information updates directly from the kernel (*note Kernel
+     Interface::).
+
+CONFIG_IP_MULTICAST
+     IP: multicasting.  This option should be specified when you use
+     `ripd' or `ospfd' because these protocols use multicast.
+
+   IPv6 support has been added in GNU/Linux kernel version 2.2.  If you
+try to use the Zebra IPv6 feature on a GNU/Linux kernel, please make
+sure the following libraries have been installed.  Please note that
+these libraries will not be needed when you uses GNU C library 2.1 or
+upper.
+
+`inet6-apps'
+     The `inet6-apps' package includes basic IPv6 related libraries such
+     as `inet_ntop' and `inet_pton'.  Some basic IPv6 programs such as
+     `ping', `ftp', and `inetd' are also included. The `inet-apps' can
+     be found at <ftp://ftp.inner.net/pub/ipv6/>.
+
+`net-tools'
+     The `net-tools' package provides an IPv6 enabled interface and
+     routing utility.  It contains `ifconfig', `route', `netstat', and
+     other tools.  `net-tools' may be found at
+     <http://www.tazenda.demon.co.uk/phil/net-tools/>.
+
+
+File: zebra.info,  Node: Build the Software,  Next: Install the Software,  Prev: Configure the Software,  Up: Installation
+
+Build the Software
+==================
+
+   After configuring the software, you will need to compile it for your
+system. Simply issue the command `make' in the root of the source
+directory and the software will be compiled. If you have *any* problems
+at this stage, be certain to send a bug report *Note Bug Reports::.
+
+     % ./configure
+     .
+     .
+     .
+     ./configure output
+     .
+     .
+     .
+     % make
+
+
+File: zebra.info,  Node: Install the Software,  Prev: Build the Software,  Up: Installation
+
+Install the Software
+====================
+
+   Installing the software to your system consists of copying the
+compiled programs and supporting files to a standard location. After the
+installation process has completed, these files have been copied from
+your work directory to `/usr/local/bin', and `/usr/local/etc'.
+
+   To install the Zebra suite, issue the following command at your shell
+prompt: `make install'.
+
+     %
+     % make install
+     %
+
+   Zebra daemons have their own terminal interface or VTY.  After
+installation, you have to setup each beast's port number to connect to
+them.  Please add the following entries to `/etc/services'.
+
+     zebrasrv      2600/tcp		  # zebra service
+     zebra         2601/tcp		  # zebra vty
+     ripd          2602/tcp		  # RIPd vty
+     ripngd        2603/tcp		  # RIPngd vty
+     ospfd         2604/tcp		  # OSPFd vty
+     bgpd          2605/tcp		  # BGPd vty
+     ospf6d        2606/tcp		  # OSPF6d vty
+
+   If you use a FreeBSD newer than 2.2.8, the above entries are already
+added to `/etc/services' so there is no need to add it. If you specify
+a port number when starting the daemon, these entries may not be needed.
+
+   You may need to make changes to the config files in
+`/usr/local/etc/*.conf'. *Note Config Commands::.
+
+
+File: zebra.info,  Node: Basic commands,  Next: zebra,  Prev: Installation,  Up: Top
+
+Basic commands
+**************
+
+   There are five routing daemons in use, and there is one manager
+daemon.  These daemons may be located on separate machines from the
+manager daemon.  Each of these daemons will listen on a particular port
+for incoming VTY connections.  The routing daemons are:
+
+   * `ripd', `ripngd', `ospfd', `ospf6d', `bgpd'
+
+   * `zebra'
+
+   The following sections discuss commands common to all the routing
+daemons.
+
+* Menu:
+
+* Config Commands::             Commands used in config files
+* Common Invocation Options::   Starting the daemons
+* Virtual Terminal Interfaces::  Interacting with the daemons
+
+
+File: zebra.info,  Node: Config Commands,  Next: Common Invocation Options,  Prev: Basic commands,  Up: Basic commands
+
+Config Commands
+===============
+
+* Menu:
+
+* Basic Config Commands::       Some of the generic config commands
+* Sample Config File::          An example config file
+
+   In a config file, you can write the debugging options, a vty's
+password, routing daemon configurations, a log file name, and so forth.
+This information forms the initial command set for a routing beast as
+it is starting.
+
+   Config files are generally found in:
+
+     `/usr/local/etc/*.conf'
+
+   Each of the daemons has its own config file.  For example, zebra's
+default config file name is:
+
+     `/usr/local/etc/zebra.conf'
+
+   The daemon name plus `.conf' is the default config file name. You
+can specify a config file using the `-f' or `--config-file' options
+when starting the daemon.
+
+
+File: zebra.info,  Node: Basic Config Commands,  Next: Sample Config File,  Prev: Config Commands,  Up: Config Commands
+
+Basic Config Commands
+---------------------
+
+ - Command: hostname HOSTNAME
+     Set hostname of the router.
+
+ - Command: password PASSWORD
+     Set password for vty interface.  If there is no password, a vty
+     won't accept connections.
+
+ - Command: enable password PASSWORD
+     Set enable password.
+
+ - Command: log stdout
+ - Command: no log stdout
+     Set logging output to stdout.
+
+ - Command: log file FILENAME
+     If you want to log into a file please specify `filename' as
+     follows.
+          log file /usr/local/etc/bgpd.log
+
+ - Command: log syslog
+ - Command: no log syslog
+     Set logging output to syslog.
+
+ - Command: write terminal
+     Displays the current configuration to the vty interface.
+
+ - Command: write file
+     Write current configuration to configuration file.
+
+ - Command: configure terminal
+     Change to configuration mode.  This command is the first step to
+     configuration.
+
+ - Command: terminal length <0-512>
+     Set terminal display length to <0-512>.  If length is 0, no
+     display control is performed.
+
+ - Command: who
+
+ - Command: list
+     List commands.
+
+ - Command: service password-encryption
+     Encrypt password.
+
+ - Command: service advanced-vty
+     Enable advanced mode VTY.
+
+ - Command: service terminal-length <0-512>
+     Set system wide line configuration.  This configuration command
+     applies to all VTY interfaces.
+
+ - Command: show version
+     Show the current version of the Zebra and its build host
+     information.
+
+ - Command: line vty
+     Enter vty configuration mode.
+
+ - Command: banner motd default
+     Set default motd string.
+
+ - Command: no banner motd
+     No motd banner string will be printed.
+
+ - Line Command: exec-timeout MINUTE
+ - Line Command: exec-timeout MINUTE SECOND
+     Set VTY connection timeout value.  When only one argument is
+     specified it is used for timeout value in minutes.  Optional
+     second argument is used for timeout value in seconds. Default
+     timeout value is 10 minutes.  When timeout value is zero, it means
+     no timeout.
+
+ - Line Command: no exec-timeout
+     Do not perform timeout at all.  This command is as same as
+     `exec-timeout 0 0'.
+
+ - Line Command: access-class ACCESS-LIST
+     Restrict vty connections with an access list.
+
+
+File: zebra.info,  Node: Sample Config File,  Prev: Basic Config Commands,  Up: Config Commands
+
+Sample Config File
+------------------
+
+   Below is a sample configuration file for the zebra daemon.
+
+     !
+     ! Zebra configuration file
+     !
+     hostname Router
+     password zebra
+     enable password zebra
+     !
+     log stdout
+     !
+     !
+
+   '!' and '#' are comment characters.  If the first character of the
+word is one of the comment characters then from the rest of the line
+forward will be ignored as a comment.
+
+     password zebra!password
+
+   If a comment character is not the first character of the word, it's a
+normal character. So in the above example '!' will not be regarded as a
+comment and the password is set to 'zebra!password'.
+
+
+File: zebra.info,  Node: Common Invocation Options,  Next: Virtual Terminal Interfaces,  Prev: Config Commands,  Up: Basic commands
+
+Common Invocation Options
+=========================
+
+   These options apply to all Zebra daemons.
+
+`-d'
+`--daemon'
+     Runs in daemon mode.
+
+`-f FILE'
+`--config_file=FILE'
+     Set configuration file name.
+
+`-h'
+`--help'
+     Display this help and exit.
+
+`-i FILE'
+`--pid_file=FILE'
+     Upon startup the process identifier of the daemon is written to a
+     file, typically in `/var/run'.  This file can be used by the init
+     system to implement commands such as `.../init.d/zebra status',
+     `.../init.d/zebra restart' or `.../init.d/zebra stop'.
+
+     The file name is an run-time option rather than a configure-time
+     option so that multiple routing daemons can be run simultaneously.
+     This is useful when using Zebra to implement a routing looking
+     glass.  One machine can be used to collect differing routing views
+     from differing points in the network.
+
+`-P PORT'
+`--vty_port=PORT'
+     Set the VTY port number.
+
+`-v'
+`--version'
+     Print program version.
+
+
+File: zebra.info,  Node: Virtual Terminal Interfaces,  Prev: Common Invocation Options,  Up: Basic commands
+
+Virtual Terminal Interfaces
+===========================
+
+   VTY - Virtual Terminal [aka TeletYpe] Interface is a command line
+interface (CLI) for user interaction with the routing daemon.
+
+* Menu:
+
+* VTY Overview::                Basics about VTYs
+* VTY Modes::                   View, Enable, and Other VTY modes
+* VTY CLI Commands::            Commands for movement, edition, and management
+
+
+File: zebra.info,  Node: VTY Overview,  Next: VTY Modes,  Prev: Virtual Terminal Interfaces,  Up: Virtual Terminal Interfaces
+
+VTY Overview
+------------
+
+   VTY stands for Virtual TeletYpe interface.  It means you can connect
+to the daemon via the telnet protocol.
+
+   To enable a VTY interface, you have to setup a VTY password.  If
+there is no VTY password, one cannot connect to the VTY interface at
+all.
+
+     % telnet localhost 2601
+     Trying 127.0.0.1...
+     Connected to localhost.
+     Escape character is '^]'.
+     
+     Hello, this is zebra (version 0.93)
+     Copyright 1997-2000 Kunihiro Ishiguro
+     
+     
+     User Access Verification
+     
+     Password: XXXXX
+     Router> ?
+       enable            Turn on privileged commands
+       exit              Exit current mode and down to previous mode
+       help              Description of the interactive help system
+       list              Print command list
+       show              Show running system information
+       who               Display who is on a vty
+     Router> enable
+     Password: XXXXX
+     Router# configure terminal
+     Router(config)# interface eth0
+     Router(config-if)# ip address 10.0.0.1/8
+     Router(config-if)# ^Z
+     Router#
+
+   '?' is very useful for looking up commands.
+
+
+File: zebra.info,  Node: VTY Modes,  Next: VTY CLI Commands,  Prev: VTY Overview,  Up: Virtual Terminal Interfaces
+
+VTY Modes
+---------
+
+   There are three basic VTY modes:
+
+* Menu:
+
+* VTY View Mode::               Mode for read-only interaction
+* VTY Enable Mode::             Mode for read-write interaction
+* VTY Other Modes::             Special modes (tftp, etc)
+
+   There are commands that may be restricted to specific VTY modes.
+
+
+File: zebra.info,  Node: VTY View Mode,  Next: VTY Enable Mode,  Prev: VTY Modes,  Up: VTY Modes
+
+VTY View Mode
+.............
+
+   This mode is for read-only access to the CLI. One may exit the mode
+by leaving the system, or by entering `enable' mode.
+
+
+File: zebra.info,  Node: VTY Enable Mode,  Next: VTY Other Modes,  Prev: VTY View Mode,  Up: VTY Modes
+
+VTY Enable Mode
+...............
+
+   This mode is for read-write access to the CLI. One may exit the mode
+by leaving the system, or by escaping to view mode.
+
+
+File: zebra.info,  Node: VTY Other Modes,  Prev: VTY Enable Mode,  Up: VTY Modes
+
+VTY Other Modes
+...............
+
+   This page is for describing other modes.
+
+
+File: zebra.info,  Node: VTY CLI Commands,  Prev: VTY Modes,  Up: Virtual Terminal Interfaces
+
+VTY CLI Commands
+----------------
+
+   Commands that you may use at the command-line are described in the
+following three subsubsections.
+
+* Menu:
+
+* CLI Movement Commands::       Commands for moving the cursor about
+* CLI Editing Commands::        Commands for changing text
+* CLI Advanced Commands::       Other commands, session management and so on
+
+
+File: zebra.info,  Node: CLI Movement Commands,  Next: CLI Editing Commands,  Prev: VTY CLI Commands,  Up: VTY CLI Commands
+
+CLI Movement Commands
+.....................
+
+   These commands are used for moving the CLI cursor. The <C> character
+means press the Control Key.
+
+`C-f'
+`<RIGHT>'
+     Move forward one character.
+
+`C-b'
+`<LEFT>'
+     Move backward one character.
+
+`M-f'
+     Move forward one word.
+
+`M-b'
+     Move backward one word.
+
+`C-a'
+     Move to the beginning of the line.
+
+`C-e'
+     Move to the end of the line.
+
+
+File: zebra.info,  Node: CLI Editing Commands,  Next: CLI Advanced Commands,  Prev: CLI Movement Commands,  Up: VTY CLI Commands
+
+CLI Editing Commands
+....................
+
+   These commands are used for editing text on a line. The <C>
+character means press the Control Key.
+
+`C-h'
+`<DEL>'
+     Delete the character before point.
+
+`C-d'
+     Delete the character after point.
+
+`M-d'
+     Forward kill word.
+
+`C-w'
+     Backward kill word.
+
+`C-k'
+     Kill to the end of the line.
+
+`C-u'
+     Kill line from the beginning, erasing input.
+
+`C-t'
+     Transpose character.
+
+
+File: zebra.info,  Node: CLI Advanced Commands,  Prev: CLI Editing Commands,  Up: VTY CLI Commands
+
+CLI Advanced Commands
+.....................
+
+   There are several additional CLI commands for command line
+completions, insta-help, and VTY session management.
+
+`C-c'
+     Interrupt current input and moves to the next line.
+
+`C-z'
+     End current configuration session and move to top node.
+
+`C-n'
+`<DOWN>'
+     Move down to next line in the history buffer.
+
+`C-p'
+`<UP>'
+     Move up to previous line in the history buffer.
+
+`TAB'
+     Use command line completion by typing <TAB>.
+
+`'
+     You can use command line help by typing `help' at the beginning of
+     the line.  Typing `?' at any point in the line will show possible
+     completions.
+
+
+File: zebra.info,  Node: zebra,  Next: RIP,  Prev: Basic commands,  Up: Top
+
+zebra
+*****
+
+   `zebra' is an IP routing manager.  It provides kernel routing table
+updates, interface lookups, and redistribution of routes between
+different routing protocols.
+
+* Menu:
+
+* Invoking zebra::              Running the program
+* Interface Commands::          Commands for zebra interfaces
+* Static Route Commands::       Commands for adding static routes
+* zebra Terminal Mode Commands::  Commands for zebra's VTY
+
+
+File: zebra.info,  Node: Invoking zebra,  Next: Interface Commands,  Prev: zebra,  Up: zebra
+
+Invoking zebra
+==============
+
+   Besides the common invocation options (*note Common Invocation
+Options::), the `zebra' specific invocation options are listed below.
+
+`-b'
+`--batch'
+     Runs in batch mode.  `zebra' parses configuration file and
+     terminates immediately.
+
+`-k'
+`--keep_kernel'
+     When zebra starts up, don't delete old self inserted routes.
+
+`-l'
+`--log_mode'
+     Set verbose logging on.
+
+`-r'
+`--retain'
+     When program terminates, retain routes added by zebra.
+
+
+File: zebra.info,  Node: Interface Commands,  Next: Static Route Commands,  Prev: Invoking zebra,  Up: zebra
+
+Interface Commands
+==================
+
+ - Command: interface IFNAME
+
+ - Interface Command: shutdown
+ - Interface Command: no shutdown
+     Up or down the current interface.
+
+ - Interface Command: ip address ADDRESS
+     Set ip address for the interface.
+
+ - Interface Command: description DESCRIPTION ...
+     Set description for the interface.
+
+ - Interface Command: multicast
+ - Interface Command: no multicast
+     Enable or disables multicast flag for the interface.
+
+ - Interface Command: bandwidth <1-10000000>
+ - Interface Command: no bandwidth <1-10000000>
+     Set bandwidth value to the interface.  This is for calculating OSPF
+     cost.  This command does not affect the actual device
+     configuration.
+
+
+File: zebra.info,  Node: Static Route Commands,  Next: zebra Terminal Mode Commands,  Prev: Interface Commands,  Up: zebra
+
+Static Route Commands
+=====================
+
+   Static routing is a very fundamental feature of routing technology.
+It defines static prefix and gateway.
+
+ - Command: ip route NETWORK GATEWAY
+     NETWORK is destination prefix with format of A.B.C.D/M.  GATEWAY
+     is gateway for the prefix.  When GATEWAY is A.B.C.D format.  It is
+     taken as a IPv4 address gateway.  Otherwise it is treated as an
+     interface name.
+
+          ip route 10.0.0.0/8 10.0.0.2
+          ip route 10.0.0.0/8 ppp0
+
+     First example defines 10.0.0.0/8 static route with gateway
+     10.0.0.2.  Second one defines the same prefix but with gateway to
+     interface ppp0.
+
+ - Command: ip route NETWORK NETMASK GATEWAY
+     This is alternate version of above command.  When NETWORK is
+     A.B.C.D format, user must define NETMASK value with A.B.C.D
+     format.  GATEWAY is same option as above command
+
+          ip route 10.0.0.0 255.255.255.0 10.0.0.2
+          ip route 10.0.0.0 255.255.255.0 ppp0
+
+     This is a same setting using this statement.
+
+ - Command: ip route NETWORK GATEWAY DISTANCE
+
+   Multiple nexthop static route
+
+     ip route 10.0.0.1/32 10.0.0.2
+     ip route 10.0.0.1/32 10.0.0.3
+     ip route 10.0.0.1/32 eth0
+
+   If there is no route to 10.0.0.2 and 10.0.0.3, and interface eth0 is
+reachable, then the last route is installed into the kernel.
+
+     zebra> show ip route
+     S>  10.0.0.1/32 [1/0] via 10.0.0.2 inactive
+                           via 10.0.0.3 inactive
+       *                   is directly connected, eth0
+
+   Floating static route
+
+ - Command: ipv6 route NETWORK GATEWAY
+
+ - Command: ipv6 route NETWORK GATEWAY DISTANCE
+
+ - Command: table TABLENO
+     Select the primary kernel routing table to be used.  This only
+     works for kernels supporting multiple routing tables (like
+     GNU/Linux 2.2.x and later).  After setting TABLENO with this
+     command, static routes defined after this are added to the
+     specified table.
+
+
+File: zebra.info,  Node: zebra Terminal Mode Commands,  Prev: Static Route Commands,  Up: zebra
+
+zebra Terminal Mode Commands
+============================
+
+ - Command: show ip route
+     Display current routes which zebra holds in its database.
+
+          Router# show ip route
+          Codes: K - kernel route, C - connected, S - static, R - RIP,
+                 B - BGP * - FIB route.
+          
+          K* 0.0.0.0/0              203.181.89.241
+          S  0.0.0.0/0              203.181.89.1
+          C* 127.0.0.0/8            lo
+          C* 203.181.89.240/28      eth0
+
+ - Command: show ipv6 route
+
+ - Command: show interface
+
+ - Command: show ipforward
+     Display whether the host's IP forwarding function is enabled or
+     not.  Almost any UNIX kernel can be configured with IP forwarding
+     disabled.  If so, the box can't work as a router.
+
+ - Command: show ipv6forward
+     Display whether the host's IP v6 forwarding is enabled or not.
+
+
+File: zebra.info,  Node: RIP,  Next: RIPng,  Prev: zebra,  Up: Top
+
+RIP
+***
+
+   RIP - Routing Information Protocol is widely deployed interior
+gateway protocol.  RIP was developed in the 1970s at Xerox Labs as part
+of the XNS routing protocol.  RIP is a "distance-vector" protocol and is
+based on the "Bellman-Ford" algorithms.  As a distance-vector protocol,
+RIP router send updates to its neighbors periodically, thus allowing
+the convergence to a known topology.  In each update, the distance to
+any given network will be broadcasted to its neighboring router.
+
+   `ripd' supports RIP version 2 as described in RFC2453 and RIP
+version 1 as described in RFC1058.
+
+* Menu:
+
+* Starting and Stopping ripd::
+* RIP Configuration::
+* How to Announce RIP route::
+* Filtering RIP Routes::
+* RIP Metric Manipulation::
+* RIP distance::
+* RIP route-map::
+* RIP Authentication::
+* RIP Timers::
+* Show RIP Information::
+* RIP Debug Commands::
+
+
+File: zebra.info,  Node: Starting and Stopping ripd,  Next: RIP Configuration,  Prev: RIP,  Up: RIP
+
+Starting and Stopping ripd
+==========================
+
+   The default configuration file name of `ripd''s is `ripd.conf'.
+When invocation `ripd' searches directory /usr/local/etc.  If
+`ripd.conf' is not there next search current directory.
+
+   RIP uses UDP port 521 to send and receive RIP packets.  So the user
+must have the capability to bind the port, generally this means that
+the user must have superuser privileges.  RIP protocol requires
+interface information maintained by `zebra' daemon.  So running `zebra'
+is mandatory to run `ripd'.  Thus minimum sequence for running RIP is
+like below:
+
+     # zebra -d
+     # ripd -d
+
+   Please note that `zebra' must be invoked before `ripd'.
+
+   To stop `ripd'.  Please use `kill `cat /var/run/ripd.pid`'.  Certain
+signals have special meaningss to `ripd'.
+
+`SIGHUP'
+     Reload configuration file `ripd.conf'.  All configurations are
+     reseted.  All routes learned so far are cleared and removed from
+     routing table.
+
+`SIGUSR1'
+     Rotate `ripd' logfile.
+
+`SIGINT'
+`SIGTERM'
+     `ripd' sweeps all installed RIP routes then terminates properly.
+
+   `ripd' invocation options.  Common options that can be specified
+(*note Common Invocation Options::).
+
+`-r'
+`--retain'
+     When the program terminates, retain routes added by `ripd'.
+
+* Menu:
+
+* RIP netmask::
+
+
+File: zebra.info,  Node: RIP netmask,  Prev: Starting and Stopping ripd,  Up: Starting and Stopping ripd
+
+RIP netmask
+-----------
+
+   The netmask features of `ripd' support both version 1 and version 2
+of RIP.  Version 1 of RIP originally contained no netmask information.
+In RIP version 1, network classes were originally used to determine the
+size of the netmask.  Class A networks use 8 bits of mask, Class B
+networks use 16 bits of masks, while Class C networks use 24 bits of
+mask.  Today, the most widely used method of a network mask is assigned
+to the packet on the basis of the interface that received the packet.
+Version 2 of RIP supports a variable length subnet mask (VLSM).  By
+extending the subnet mask, the mask can be divided and reused.  Each
+subnet can be used for different purposes such as large to middle size
+LANs and WAN links.  Zebra `ripd' does not support the non-sequential
+netmasks that are included in RIP Version 2.
+
+   In a case of similar information with the same prefix and metric, the
+old information will be suppressed.  Ripd does not currently support
+equal cost multipath routing.
+
+
+File: zebra.info,  Node: RIP Configuration,  Next: How to Announce RIP route,  Prev: Starting and Stopping ripd,  Up: RIP
+
+RIP Configuration
+=================
+
+ - Command: router rip
+     The `router rip' command is necessary to enable RIP.  To disable
+     RIP, use the `no router rip' command.  RIP must be enabled before
+     carrying out any of the RIP commands.
+
+ - Command: no rouer rip
+     Disable RIP.
+
+   RIP can be configured to process either Version 1 or Version 2
+packets, the default mode is Version 2.  If no version is specified,
+then the RIP daemon will default to Version 2.  If RIP is set to Version
+1, the setting "Version 1" will be displayed, but the setting "Version
+2" will not be displayed whether or not Version 2 is set explicitly as
+the version of RIP being used.
+
+ - RIP Command: network NETWORK
+ - RIP Command: no network NETWORK
+     Set the RIP enable interface by NETWORK.  The interfaces which
+     have addresses matching with NETWORK are enabled.
+
+     This group of commands either enables or disables RIP interfaces
+     between certain numbers of a specified network address.  For
+     example, if the network for 10.0.0.0/24 is RIP enabled, this would
+     result in all the addresses from 10.0.0.0 to 10.0.0.255 being
+     enabled for RIP.  The `no network' command will disable RIP for
+     the specified network.
+
+ - RIP Command: network IFNAME
+ - RIP Command: no network IFNAME
+     Set a RIP enabled interface by IFNAME.  Both the sending and
+     receiving of RIP packets will be enabled on the port specified in
+     the `network ifname' command.  The `no network ifname' command
+     will disable RIP on the specified interface.
+
+ - RIP Command: neighbor A.B.C.D
+ - RIP Command: no neighbor A.B.C.D
+     Specify RIP neighbor.  When a neighbor doesn't understand
+     multicast, this command is used to specify neighbors.  In some
+     cases, not all routers will be able to understand multicasting,
+     where packets are sent to a network or a group of addresses.  In a
+     situation where a neighbor cannot process multicast packets, it is
+     necessary to establish a direct link between routers.  The
+     neighbor command allows the network administrator to specify a
+     router as a RIP neighbor.  The `no neighbor a.b.c.d' command will
+     disable the RIP neighbor.
+
+   Below is very simple RIP configuration.  Interface `eth0' and
+interface which address match to `10.0.0.0/8' are RIP enabled.
+
+     !
+     router rip
+      network 10.0.0.0/8
+      network eth0
+     !
+
+   Passive interface
+
+ - RIP command: passive-interface IFNAME
+ - RIP command: no passive-interface IFNAME
+     This command sets the specified interface to passive mode.  On
+     passive mode interface, all receiving packets are processed as
+     normal and ripd does not send either multicast or unicast RIP
+     packets except to RIP neighbors specified with `neighbor' command.
+
+   RIP version handling
+
+ - RIP Command: version VERSION
+     Set RIP process's version.  VERSION can be "1" or "2".
+
+ - Interface command: ip rip send version VERSION
+     VERSION can be `1', `2', `1 2'.  This configuration command
+     overrides the router's rip version setting.  The command will
+     enable the selected interface to send packets with RIP Version 1,
+     RIP Version 2, or both.  In the case of '1 2', packets will be
+     both broadcast and multicast.
+
+ - Interface command: ip rip receive version VERSION
+     Version setting for incoming RIP packets.  This command will
+     enable the selected interface to receive packets in RIP Version 1,
+     RIP Version 2, or both.
+
+   RIP split-horizon
+
+ - Interface command: ip split-horizon
+ - Interface command: no ip split-horizon
+     Control split-horizon on the interface.  Default is `ip
+     split-horizon'.  If you don't perform split-horizon on the
+     interface, please specify `no ip split-horizon'.
+
+
+File: zebra.info,  Node: How to Announce RIP route,  Next: Filtering RIP Routes,  Prev: RIP Configuration,  Up: RIP
+
+How to Announce RIP route
+=========================
+
+ - RIP command: redistribute kernel
+ - RIP command: redistribute kernel metric <0-16>
+ - RIP command: redistribute kernel route-map ROUTE-MAP
+ - RIP command: no redistribute kernel
+     `redistribute kernel' redistributes routing information from
+     kernel route entries into the RIP tables. `no redistribute kernel'
+     disables the routes.
+
+ - RIP command: redistribute static
+ - RIP command: redistribute static metric <0-16>
+ - RIP command: redistribute static route-map ROUTE-MAP
+ - RIP command: no redistribute static
+     `redistribute static' redistributes routing information from
+     static route entries into the RIP tables. `no redistribute static'
+     disables the routes.
+
+ - RIP command: redistribute connected
+ - RIP command: redistribute connected metric <0-16>
+ - RIP command: redistribute connected route-map ROUTE-MAP
+ - RIP command: no redistribute connected
+     Redistribute connected routes into the RIP tables.  `no
+     redistribute connected' disables the connected routes in the RIP
+     tables.  This command redistribute connected of the interface
+     which RIP disabled.  The connected route on RIP enabled interface
+     is announced by default.
+
+ - RIP command: redistribute ospf
+ - RIP command: redistribute ospf metric <0-16>
+ - RIP command: redistribute ospf route-map ROUTE-MAP
+ - RIP command: no redistribute ospf
+     `redistribute ospf' redistributes routing information from ospf
+     route entries into the RIP tables. `no redistribute ospf' disables
+     the routes.
+
+ - RIP command: redistribute bgp
+ - RIP command: redistribute bgp metric <0-16>
+ - RIP command: redistribute bgp route-map ROUTE-MAP
+ - RIP command: no redistribute bgp
+     `redistribute bgp' redistributes routing information from bgp
+     route entries into the RIP tables. `no redistribute bgp' disables
+     the routes.
+
+   If you want to specify RIP only static routes:
+
+ - RIP command: default-information originate
+
+ - RIP command: route A.B.C.D/M
+ - RIP command: no route A.B.C.D/M
+     This command is specific to Zebra.  The `route' command makes a
+     static route only inside RIP. This command should be used only by
+     advanced users who are particularly knowledgeable about the RIP
+     protocol.  In most cases, we recommend creating a static route in
+     Zebra and redistributing it in RIP using `redistribute static'.
+
+
+File: zebra.info,  Node: Filtering RIP Routes,  Next: RIP Metric Manipulation,  Prev: How to Announce RIP route,  Up: RIP
+
+Filtering RIP Routes
+====================
+
+   RIP routes can be filtered by a distribute-list.
+
+ - Command: distribute-list ACCESS_LIST DIRECT IFNAME
+     You can apply access lists to the interface with a
+     `distribute-list' command.  ACCESS_LIST is the access list name.
+     DIRECT is `in' or `out'.  If DIRECT is `in' the access list is
+     applied to input packets.
+
+     The `distribute-list' command can be used to filter the RIP path.
+     `distribute-list' can apply access-lists to a chosen interface.
+     First, one should specify the access-list.  Next, the name of the
+     access-list is used in the distribute-list command.  For example,
+     in the following configuration `eth0' will permit only the paths
+     that match the route 10.0.0.0/8
+
+          !
+          router rip
+           distribute-list private in eth0
+          !
+          access-list private permit 10 10.0.0.0/8
+          access-list private deny any
+          !
+
+   `distribute-list' can be applied to both incoming and outgoing data.
+
+ - Command: distribute-list prefix PREFIX_LIST (in|out) IFNAME
+     You can apply prefix lists to the interface with a
+     `distribute-list' command.  PREFIX_LIST is the prefix list name.
+     Next is the direction of `in' or `out'.  If DIRECT is `in' the
+     access list is applied to input packets.
+
+
+File: zebra.info,  Node: RIP Metric Manipulation,  Next: RIP distance,  Prev: Filtering RIP Routes,  Up: RIP
+
+RIP Metric Manipulation
+=======================
+
+   RIP metric is a value for distance for the network.  Usually `ripd'
+increment the metric when the network information is received.
+Redistributed routes' metric is set to 1.
+
+ - RIP command: default-metric <1-16>
+ - RIP command: no default-metric <1-16>
+     This command modifies the default metric value for redistributed
+     routes.  The default value is 1.  This command does not affect
+     connected route even if it is redistributed by `redistribute
+     connected'.  To modify connected route's metric value, please use
+     `redistribute connected metric' or `route-map'.  `offset-list' also
+     affects connected routes.
+
+ - RIP command: offset-list ACCESS-LIST (in|out)
+ - RIP command: offset-list ACCESS-LIST (in|out) IFNAME
+
+
+File: zebra.info,  Node: RIP distance,  Next: RIP route-map,  Prev: RIP Metric Manipulation,  Up: RIP
+
+RIP distance
+============
+
+   Distance value is used in zebra daemon.  Default RIP distance is 120.
+
+ - RIP command: distance <1-255>
+ - RIP command: no distance <1-255>
+     Set default RIP distance to specified value.
+
+ - RIP command: distance <1-255> A.B.C.D/M
+ - RIP command: no distance <1-255> A.B.C.D/M
+     Set default RIP distance to specified value when the route's
+     source IP address matches the specified prefix.
+
+ - RIP command: distance <1-255> A.B.C.D/M ACCESS-LIST
+ - RIP command: no distance <1-255> A.B.C.D/M ACCESS-LIST
+     Set default RIP distance to specified value when the route's
+     source IP address matches the specified prefix and the specified
+     access-list.
+
+
+File: zebra.info,  Node: RIP route-map,  Next: RIP Authentication,  Prev: RIP distance,  Up: RIP
+
+RIP route-map
+=============
+
+   Usage of `ripd''s route-map support.
+
+   Optional argument route-map MAP_NAME can be added to each
+`redistribute' statement.
+
+     redistribute static [route-map MAP_NAME]
+     redistribute connected [route-map MAP_NAME]
+     .....
+
+   Cisco applies route-map _before_ routes will exported to rip route
+table.  In current Zebra's test implementation, `ripd' applies route-map
+after routes are listed in the route table and before routes will be
+announced to an interface (something like output filter). I think it is
+not so clear, but it is draft and it may be changed at future.
+
+   Route-map statement (*note Route Map::) is needed to use route-map
+functionality.
+
+   Route-map's match statement
+
+ - Route-map Command: match metric N
+     Match if the route has this metric.
+
+ - Route-map Command: match ip address <access-list>
+     Match if route destination is permitted by access-list.
+
+ - Route-map Command: match ip next-hot A.B.C.D
+     Cisco uses here <access-list>, `ripd' IPv4 address. Match if route
+     has this next-hop (meaning next-hop listed in the rip route table
+     - "show ip rip")
+
+ - Route-map Command: match interface NAME
+     Notation of this match is different from Cisco. Cisco uses a list
+     of interfaces - NAME1 NAME2 ... NAMEN.  Ripd allows only one name
+     (maybe will change in the future).  Next - Cisco means interface
+     which includes next-hop of routes (it is somewhat similar to "ip
+     next-hop" statement).  Ripd means interface where this route will
+     be sent. This difference is because "next-hop" of same routes
+     which sends to different interfaces must be different. Maybe it'd
+     be better to made new matches - say "match interface-out NAME" or
+     something like that.
+
+   Route-map's set statement
+
+ - Route-map Command: set metric <0-4294967295>
+     Set a metric for matched route when sending announcement.  The
+     metric value range is very large for compatibility with other
+     protocols.  For RIP, valid metric values are from 1 to 16.
+
+ - Route-map Command: set next-hop A.B.C.D
+     Set next-hop field.
+

@@ -1,0 +1,55 @@
+#!/bin/sh
+#
+# Startup script for the DBUS Daemon
+#
+
+# Source function library.
+. /usr/local/etc/init.d/functions
+
+
+PIDF=/usr/local/var/run/dbus/pid
+PROG=/usr/local/bin/dbus-daemon
+
+# Source Services Configuration File
+. /usr/local/etc/sysconfig/services
+RETVAL=0
+
+# See how we were called
+case "$1" in
+    start) 
+        # Check if dbus service is enabled
+        [ "${DBUS}" != "yes" ] && exit 1
+        echo -n "Starting dbus: "
+        mkdir -p /usr/local/var/run/dbus
+        $PROG --config-file=/usr/local/etc/dbus-1/system.conf
+        RETVAL=$?
+        [ $RETVAL -eq 0 ] && echo_success
+        [ $RETVAL -ne 0 ] && echo_failure
+        ;;
+    stop) 
+        [ ! -f $PIDF ] && exit 1
+        echo -n "Stoppng dbus: "
+        kill $(cat $PIDF)
+        RETVAL=$?
+        [ $RETVAL -eq 0 ] && rm -f $PIDF && echo_success
+        [ $RETVAL -ne 0 ] && echo_failure
+        ;;
+    restart) 
+        $0 stop
+        $0 start
+        RETVAL=$?
+        ;;
+    status) 
+        pidof dbus-daemon > /dev/null
+        RETVAL=$?
+        [ $RETVAL -eq 0 ] && echo "dbus $(pidof dbus-daemon) is running..."  && exit 0
+        [ -f $PIDF ] && echo "dbus is dead but pid file $PIDF exist" && exit 2
+        [ $RETVAL -ne 0 ] && echo "dbus is stopped"
+        RETVAL=1
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|restart|status}"
+        exit 1
+esac
+
+exit $RETVAL

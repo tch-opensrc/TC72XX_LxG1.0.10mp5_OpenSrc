@@ -1,0 +1,8 @@
+ttyS0::sysinit:/etc/init.d/rcS
+ttyS0::respawn:/bin/sh
+::respawn:lxginit 2> /dev/ttyS0
+::respawn:smbapp 2> /dev/ttyS0 
+#::askfirst:/bin/login
+#::ctrlaltdel:/bin/umount -a -r
+#ttyS0::sysinit:/etc/init.d/aprBridge
+#APRouter 

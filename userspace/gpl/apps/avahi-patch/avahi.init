@@ -1,0 +1,58 @@
+#!/bin/sh
+#
+# Startup script for the Avahi Daemon
+#
+
+# Source function library.
+. /usr/local/etc/init.d/functions
+
+
+PIDF=/var/run/avahi-daemon/pid
+PROG=/usr/local/sbin/avahi-daemon
+
+# Source Services Configuration File
+. /usr/local/etc/sysconfig/services
+RETVAL=0
+
+# See how we were called
+case "$1" in
+    start) 
+        # Check if avahi service is enabled
+        [ "${AVAHI}" != "yes" ] && exit 1
+        echo -n "Starting avahi: "
+        mkdir -p /var/run/avahi-daemon
+        $PROG -D
+        RETVAL=$?
+        [ $RETVAL -eq 0 ] && echo_success
+        [ $RETVAL -ne 0 ] && echo_failure
+        ;;
+    stop) 
+        [ ! -f $PIDF ] && exit 1
+        echo -n "Stopping avahi: "
+        $PROG -k
+        RETVAL=$?
+        [ $RETVAL -eq 0 ] && rm -f $PIDF && echo_success && exit 0
+        kill $(cat $PIDF)
+        RETVAL=$?
+        [ $RETVAL -eq 0 ] && rm -f $PIDF && echo_success && exit 0
+        [ $RETVAL -ne 0 ] && echo_failure
+        ;;
+    restart) 
+        $0 stop
+        $0 start
+        RETVAL=$?
+        ;;
+    status) 
+        pidof avahi-daemon  > /dev/null
+        RETVAL=$?
+        [ $RETVAL -eq 0 ] && echo "avahi $(pidof avahi-daemon) is running..."  && exit 0
+        [ -f $PIDF ] && echo "avahi is dead but pid file $PIDF exist" && exit 2
+        [ $RETVAL -ne 0 ] && echo "avahi is stopped"
+        RETVAL=1
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|restart|status}"
+        exit 1
+esac
+
+exit $RETVAL

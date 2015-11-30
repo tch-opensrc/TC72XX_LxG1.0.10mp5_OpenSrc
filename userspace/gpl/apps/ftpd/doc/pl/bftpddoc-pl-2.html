@@ -1,0 +1,62 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<HTML>
+<HEAD>
+ <META NAME="GENERATOR" CONTENT="LinuxDoc-Tools 0.9.8.1">
+ <TITLE>dokumentacja bftpd jezyk polski]: Instalacja</TITLE>
+ <LINK HREF="bftpddoc-pl-3.html" REL=next>
+ <LINK HREF="bftpddoc-pl-1.html" REL=previous>
+ <LINK HREF="bftpddoc-pl.html#toc2" REL=contents>
+</HEAD>
+<BODY>
+<A HREF="bftpddoc-pl-3.html">Next</A>
+<A HREF="bftpddoc-pl-1.html">Previous</A>
+<A HREF="bftpddoc-pl.html#toc2">Contents</A>
+<HR>
+<H2><A NAME="s2">2.</A> <A HREF="bftpddoc-pl.html#toc2">Instalacja</A></H2>
+
+<H2><A NAME="ss2.1">2.1 Kompilacja</A>
+</H2>
+
+<P>Najpierw uruchom nastepujace polecenia (zamieniajac x.x.x na wersje, ktora instalujesz):
+<BLOCKQUOTE><CODE>
+<PRE>
+tar xzf bftpd-x.x.x.tar.gz
+cd bftpd-x.x.x
+./configure
+make
+make install [wymaga roota]
+  
+</PRE>
+</CODE></BLOCKQUOTE>
+
+Wiedz, ze jesli upgradujesz bftpd ze starszej wersji, musisz recznie skopiowac plik bftpd.conf do katalogu /etc, poniewaz polecenie 'make install' nie nadpisuje pliku konfiguracyjnego.</P>
+<P>Uwaga: Jesli chcesz korzystac z opcji kompresji w locie do .tar.gz, musisz sciagnac kody zrodlowe gzipa oraz paxa i rozpakowac je do katalogu zrodlowego bftpd. Nastepnie, zamiast uruchomic "./configure", wykonaj &quot;./configure --enable-pax=katalog-z-paxem --enable-gzip=katalog-z-gzipem&quot;.</P>
+<H2><A NAME="ss2.2">2.2 Uruchamianie serwera</A>
+</H2>
+
+<P>Do wyboru masz uruchamianie bftpd poprzez inetd oraz w trybie standalone (demon). 
+<DL>
+<DT><B> Jesli chcesz korzystac z inetd: </B><DD><P>Dodaj nastepujacy wpis do /etc/inetd.conf: 
+<BLOCKQUOTE><CODE>
+ftp stream tcp nowait root /usr/sbin/bftpd bftpd
+<PRE>
+</PRE>
+</CODE></BLOCKQUOTE>
+
+Wyslij inetdowi sygnal HUP lub zrestartuj system. Od tego momentu bftpd powinien pracowac.</P>
+<DT><B> Jesli chcesz uruchomic bftpd jako demona (standalone): </B><DD><P>Kaz systemowi uruchamiac: 
+<BLOCKQUOTE><CODE>
+<PRE>
+/usr/sbin/bftpd -d
+</PRE>
+</CODE></BLOCKQUOTE>
+
+przy  starcie.</P>
+</DL>
+</P>
+<HR>
+<A HREF="bftpddoc-pl-3.html">Next</A>
+<A HREF="bftpddoc-pl-1.html">Previous</A>
+<A HREF="bftpddoc-pl.html#toc2">Contents</A>
+</BODY>
+</HTML>

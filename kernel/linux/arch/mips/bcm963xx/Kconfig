@@ -1,0 +1,509 @@
+# Kernel and Driver configuration for Broadcom Commengine ADSL board
+choice
+	prompt "Broadcom Commengine ADSL board"
+	depends on MIPS_BRCM
+	default BCM96362
+	help
+	  Select different Broadcom ADSL board
+
+config BCM96368
+	bool "96368 ADSL board"
+	select DMA_NONCOHERENT
+	select SYS_SUPPORTS_SMP
+	select NR_CPUS_DEFAULT_2
+	select BRCM_DCACHE_SHARED
+	select SYS_HAS_CPU_MIPS32_R1
+
+config BCM96816
+        bool "96816 GPON board"
+	select SYS_SUPPORTS_SMP
+	select DMA_NONCOHERENT
+	select NR_CPUS_DEFAULT_2
+	select BRCM_DCACHE_SHARED
+	select SYS_HAS_CPU_MIPS32_R1
+
+config BCM96362
+	bool "96362 ADSL board"
+	select DMA_NONCOHERENT
+	select SYS_SUPPORTS_SMP
+	select NR_CPUS_DEFAULT_2
+	select BRCM_DCACHE_SHARED
+	select SYS_HAS_CPU_MIPS32_R1
+
+config BCM96328
+	bool "96328 ADSL board"
+	select DMA_NONCOHERENT
+	select SYS_SUPPORTS_SMP
+	select NR_CPUS_DEFAULT_2
+	select BRCM_DCACHE_SHARED
+	select SYS_HAS_CPU_MIPS32_R1
+
+config BCM93380
+    bool "93380 LRG board"
+	select SYS_SUPPORTS_SMP
+	select DMA_NONCOHERENT
+	select NR_CPUS_DEFAULT_2
+	select BRCM_DCACHE_SHARED
+	select SYS_HAS_CPU_MIPS32_R1
+
+config BCMKILAUEA
+    bool "KILAUEA board"
+	select SYS_SUPPORTS_SMP
+	select DMA_NONCOHERENT
+	select NR_CPUS_DEFAULT_2
+	select BRCM_DCACHE_SHARED
+	select SYS_HAS_CPU_MIPS32_R1
+
+config BCM93383 
+    bool "93383 board"
+	select SYS_SUPPORTS_SMP
+	select DMA_NONCOHERENT
+	select NR_CPUS_DEFAULT_2
+	select BRCM_DCACHE_SHARED
+
+endchoice
+
+config BRCM_DCACHE_SHARED
+	bool "Enable Shared D-Cache Support"
+	depends on SMP
+	default n
+
+config BRCM_TLB_SHARED
+	bool "Enable Shared TLB Support"
+	depends on SMP
+	default n
+
+config BCM_BOARD
+	bool "Support for Broadcom Board"
+	depends on BCM96368 || BCM96816 || BCM96362 || BCM96328 || BCM93380 || BCMKILAUEA || BCM93383
+
+config BCM_SERIAL
+	tristate "Support for Serial Port"
+	depends on BCM96368 || BCM96816 || BCM96362 || BCM96328 || BCM93380 || BCMKILAUEA || BCM93383
+	select SERIAL_CORE
+	select SERIAL_CORE_CONSOLE
+
+config BCM_APROUTER
+   bool "Support for APRouter"
+   depends on BCM93383
+   default n
+
+config L2TP
+	tristate "Support for L2TP"
+	depends on BCM96368 || BCM96816 || BCM96362 || BCM96328
+
+config BCM_SPU
+        tristate "Support for IPSec SPU"
+        depends on BCM96368 || BCM96816 || BCM96362
+        help
+                Say 'M' to include support for IPSec SPU.
+
+config BCM_PKTFLOW
+	tristate "Support for Broadcom Packet Flow Cache"
+        depends on BCM96368 || BCM96816 || BCM96362 || BCM96328 || BCM93380
+	help
+		Say 'M' to include support for Broadcom Packet Flow Cache.
+		Static compile not supported.
+
+config BCM_PKTCMF
+	tristate "Support for Packet CMF"
+        depends on BCM96368 || BCM96816
+	help
+		Say 'M' to include support for Packet CMF.
+		Static compile not supported.
+
+config BCM_FAP
+	tristate "Support for Forward Assist Processor (FAP)"
+        depends on BCM96362
+	help
+		Say 'M' to include support for FAP.
+		Static compile not supported.
+
+config BCM_PKTDMA
+	tristate "Support for Packet DMA"
+        depends on BCM96362
+	help
+		Say 'M' to include support for Packet DMA.
+		Dynamic compile not supported.
+
+config BCM_ENET
+	tristate "Support for Ethernet"
+        depends on BCM96368 || BCM96816 || BCM96362 || BCM96328
+
+config BCM_GPON
+	tristate "Support for GPON"
+        depends on BCM96368 || BCM96816
+
+config BCM_GPON_FPGA
+        bool "Support for GPON FPGA"
+        depends on BCM_GPON
+
+config BCM_MoCA
+        tristate "Support for MoCA"
+        depends on BCM96816
+        help
+                Select 'M' to include support for Broadcom MoCA Solution.
+                No Support For Static Build Model.
+
+config BCM_LOG
+        tristate "Support for BCM LOG"
+        depends on BCM96368 || BCM96816 || BCM96362 || BCM96328
+
+config BCM_I2C_BUS
+        tristate "Support for I2C Bus Drivers"
+        depends on BCM96816
+
+config BCM_I2C_CHIP
+        tristate "Support for I2C Chip Drivers"
+        depends on BCM96816
+
+config BCM_VLAN
+        tristate "Support for BCM VLAN"
+        depends on BCM96368 || BCM96816 || BCM96362 || BCM96328
+
+config BCM_USB
+	tristate "Support for USB"
+        depends on BCM96368 || BCM96816 || BCM96362 || BCM96328
+
+config BCM_ISDN
+	tristate "Support for ISDN"
+        depends on BCM96368 || BCM96816 || BCM96362 || BCM96328
+
+config BCM_WLAN
+	tristate "Support for Wireless"
+        depends on BCM96368 || BCM96816 || BCM96362 || BCM96328
+
+config BCM_PCI
+	bool "Support for PCI"
+        depends on BCM96368 || BCM96816 || BCM96362 || BCM96328
+	select PCI
+
+config BCM_WLAN_USBAP
+	bool "Support for Wireless USBAP"
+	depends on BCM96368 || BCM96362 || BCM96328
+
+
+config BCM_XTMCFG
+	tristate "Support for XTM"
+	depends on BCM96368 || BCM96362 || BCM96328
+
+config BCM_ADSL
+	tristate "Support for ADSL"
+	depends on BCM96368 || BCM96362 || BCM96328
+
+config BCM_ENDPOINT
+	tristate "Support for VOICE"
+        depends on BCM96368 || BCM96816 || BCM96362 || BCM96328
+
+config BCM_DECT
+	tristate "Support for DECT"
+        depends on BCM96362
+
+config BCM_BCMPROF
+	tristate "Support for profiling"
+        depends on BCM96368 || BCM96816 || BCM96362 || BCM96328
+
+config BCM_PWRMNGT
+	tristate "Support for Power Management"
+	depends on BCM96368 || BCM96816 || BCM96362 || BCM96328
+
+config BCM_BCMDSP
+	tristate "Support for DSP application"
+        depends on BCM96368 || BCM96816 || BCM96362 || BCM96328 || BCM93380 || BCM93383
+
+config BCM_PROCFS
+	tristate "Support for PROCFS"
+        depends on BCM96368 || BCM96816 || BCM96362 || BCM96328
+
+config BCM_P8021AG
+	tristate "Support for IEEE P8021.ag"
+        depends on BCM96368 || BCM96816 || BCM96362 || BCM96328
+
+config BCM_SMUX
+	tristate "Support for  MSC/SMUX Services"
+	depends on BCM96368 || BCM96362 || BCM96328
+
+config BCM_SPU
+	tristate "Support for SPU IPSec Engine"
+	depends on BCM96368 || BCM96816 || BCM96362
+
+config BCM_TRNG
+	tristate "BCM HW Random Number Generator support"
+	depends on HW_RANDOM || BCM96368 || BCM96816 || BCM96362
+	---help---
+	  This driver provides kernel-side support for the Random Number
+	  Generator hardware found on bcm.
+
+	  To compile this driver as a module, choose M here: the
+	  module will be called intel-rng.
+
+	  If unsure, say Y.
+
+config BCM_LOT1
+	bool "Running Linux on Thread 1"
+	depends on BCM93380 || BCM93383
+
+config BCM_VECTOR
+	bool "Thread 1 has separate exception vectors"
+	depends on BCM93380 || BCM93383
+
+config BCM_RAMDISK
+	bool "Using RAM to hold root file system"
+	depends on (BCM93380 && BCM_LOT1) || BCMKILAUEA || BCM93383
+
+config BCM_T0_IDLE
+	bool "Running Linux on Thread 1 with T0 idle"
+	depends on BCM93380 && BCM_LOT1
+
+config BCM_UPPER_MEM
+	bool "Running Linux on Thread 1 in the upper half of memory"
+	depends on (BCM93380 && BCM_LOT1) || BCM93383
+
+config BCM_IOP
+	tristate "Support for 3380 I/O processors"
+	depends on BCM93380 || BCM93383
+
+config BCM_IOPLIB
+	bool "Support for 3380 I/O processors library"
+	depends on BCM93380 || BCM93383
+
+config BCM_DQM
+	tristate "Support for 338x DQMs"
+	depends on BCM93380 || BCM93383
+
+config BCM_FPM
+	tristate "Support for 3380 free pool managert"
+	depends on BCM93380 || BCM93383
+
+config BCM_VENET
+	tristate "Support for Virtual Ethernet between TPs"
+	depends on BCM93380 || BCM93383
+
+config BCM_VNIHAL
+	tristate "Support for Virtual NI HALs between TPs"
+	depends on BCM93383 && BCM_APROUTER
+
+config BCM_PLATFORM_DEVS
+    tristate "Support for platform devices, ie, BCM USB Host"
+    depends on BCM93380 || BCM93383
+    
+config BCM_USB_HOST
+    tristate "Support for USB Host"
+    depends on BCM96338 || BCM96348 || BCM96358 || BCM96368 || BCM93378 || BCM93380 || BCM93383 || BCM_PLATFORM_DEVS
+
+config BCM_BOARD_IMPL
+	int "Implementation index for ADSL Board"
+	depends on BCM96368 || BCM96816 || BCM96362 || BCM96328 || BCM93380 || BCMKILAUEA || BCM93383
+
+config BCM_SERIAL_IMPL
+	int "Implementation index for Serial"
+	depends on BCM96368 || BCM96816 || BCM96362 || BCM96328 || BCM93380 || BCMKILAUEA || BCM93383
+
+config BCM_SPU_IMPL
+        int "Implementation index for IPSec SPU"
+        depends on BCM96368 || BCM96816 || BCM96362
+
+config BCM_TRNG_IMPL
+	int "Implementation index for TRNG "
+	depends on BCM96368 || BCM96816 || BCM96362
+
+config BCM_PKTFLOW_IMPL
+	int "Implementation index for Broadcom Flow Cache"
+	depends on BCM96816 || BCM96368 || BCM96362 || BCM96328 || BCM93380
+
+config BCM_PKTCMF_IMPL
+	int "Implementation index for Packet CMF"
+        depends on BCM96368 || BCM96816
+
+config BCM_FAP_IMPL
+	int "Implementation index for FAP"
+        depends on BCM96362
+
+config BCM_PKTDMA_IMPL
+	int "Implementation index for Packet DMA"
+        depends on BCM96362
+
+config BCM_ENET_IMPL
+	int "Implementation index for Ethernet"
+        depends on BCM96368 || BCM96816 || BCM96362 || BCM96328
+
+config BCM_GPON_IMPL
+	int "Implementation index for GPON"
+        depends on BCM96816
+
+config BCM_MoCA_IMPL
+        int "Implementation index for MoCA"
+        depends on BCM96816
+
+config BCM_LOG_IMPL
+        int "Implementation index for BCM LOG"
+        depends on BCM96368 || BCM96816 || BCM96362 || BCM96328
+
+config BCM_I2C_BUS_IMPL
+        int "Implementation index for I2C Bus"
+        depends on BCM96816
+
+config BCM_I2C_CHIP_IMPL
+        int "Implementation index for I2C Chip"
+        depends on BCM96816
+
+config BCM_VLAN_IMPL
+        int "Implementation index for BCM VLAN"
+        depends on BCM96368 || BCM96816 || BCM96362 || BCM96328
+
+config BCM_USB_IMPL
+	int "Implementation index for USB"
+        depends on BCM96368 || BCM96816 || BCM96362 || BCM96328
+
+config BCM_ISDN_IMPL
+	int "Implementation index for ISDN"
+        depends on BCM96368 || BCM96816 || BCM96362 || BCM96328
+
+config BCM_WLAN_IMPL
+	int "Implementation index for WIRELESS"
+        depends on BCM96368 || BCM96816 || BCM96362 || BCM96328
+
+config BCM_XTMCFG_IMPL
+	int "Implementation index for XTMCFG"
+	depends on BCM96368 || BCM96362 || BCM96328
+
+config BCM_XTMRT_IMPL
+  	int "Implementation index for XTMRT"
+	depends on BCM96368 || BCM96362 || BCM96328
+
+config BCM_ADSL_IMPL
+	int "Implementation index for ADSL"
+	depends on BCM96368 || BCM96362 || BCM96328
+
+config BCM_ENDPOINT_IMPL
+	int "Implementation index for VOICE"
+        depends on BCM96368 || BCM96816 || BCM96362 || BCM96328
+
+config BCM_DECT_IMPL
+	int "Implementation index for DECT"
+        depends on BCM96362
+
+config BCM_BCMPROF_IMPL
+	int "Implementation index for DSP APPLICATION"
+        depends on BCM96368 || BCM96816 || BCM96362 || BCM96328
+
+config BCM_BCMDSP_IMPL
+	int "Implementation index for PROFILING"
+        depends on BCM96368 || BCM96816 || BCM96362 || BCM96328 || BCM93380 || BCM93383
+
+config BCM_PROCFS_IMPL
+	int "Implementation index for PROCFS"
+        depends on BCM96368 || BCM96816 || BCM96362 || BCM96328
+
+config BCM_PWRMNGT_IMPL
+	int "Implementation index for PWRMNGT"
+	depends on BCM96368 || BCM96816 || BCM96362 || BCM96328
+
+config BCM_P8021AG_IMPL
+	int "Implementation index for IEEE P8021AG"
+        depends on BCM96368 || BCM96816 || BCM96362 || BCM96328
+
+config BCM_SMUX_IMPL
+	int "Implementation index for MSC/SMUX Services"
+	depends on BCM96368 || BCM96362 || BCM96328
+
+config BCM_SPU_IMPL
+	int "Implementation index for SPU IPSec Engine"
+	depends on BCM96368 || BCM96816 || BCM96362
+
+config BCM_IOP_IMPL
+	int "Implementation index for IOP"
+	depends on BCM93380 || BCM93383
+
+config BCM_DQM_IMPL
+	int "Implementation index for DQM"
+	depends on BCM93380 || BCM93383
+
+config BCM_FPM_IMPL
+	int "Implementation index for FPM"
+	depends on BCM93380 || BCM93383
+
+config BCM_VENET_IMPL
+	int "Implementation index for Virtual Ethernet"
+	depends on BCM93380 || BCM93383
+
+config BCM_VNIHAL_IMPL
+	int "Implementation index for Virtual NI HALs"
+	depends on BCM93383 && BCM_APROUTER
+
+config BCM_USB_HOST_IMPL
+    	int "Implementation index for USB Host"
+    	depends on BCM93380 || BCM93383
+
+choice
+	prompt "Root File System"
+	depends on MIPS_BRCM
+	default ROOTFS_SQUASHFS
+	help
+	  Select root file system on the board flash. 
+
+config ROOTFS_SQUASHFS
+        bool "SQUASHFS"
+config ROOTFS_CRAMFS
+        bool "CRAMFS"
+config ROOTFS_UBIFS
+        bool "UBIFS"
+config ROOTFS_JFFS2
+        bool "JFFS2"
+config ROOTFS_NFS
+        bool "NFS"
+
+endchoice
+
+config ROOT_FLASHFS
+	string "flash partition"
+	depends on ROOTFS_SQUASHFS || ROOTFS_CRAMFS || ROOTFS_JFFS2 || ROOTFS_UBIFS
+	default "root=31:0 ro noinitrd" if ROOTFS_SQUASHFS = y || ROOTFS_CRAMFS = y
+	default "root=31:0 rw rootfstype=jffs2" if ROOTFS_JFFS2 = y
+	default "root=ubi0:rootfs rootfstype=ubifs" if ROOTFS_UBIFS = y
+	help
+	  This is the root file system partition on flash memory
+
+config ROOT_NFS_DIR
+	string "NFS server path"
+	depends on ROOTFS_NFS
+	default "/opt/bcm96362/targets/96362GW/fs"
+	help
+	  This is the path of NFS server (host system)
+
+config BRCM_KTOOLS
+	bool "BRCM_KTOOLS"
+	default n
+	help
+		Enables the build of BRCM MIPS Kernel Tools Support for PMON, BOUNCE
+
+
+config PMON
+	bool "PMON"
+	depends on BRCM_KTOOLS
+	default n
+	help
+	  Enables the support for MIPS Performance Monitoring Counters
+
+config BRCM_BOUNCE
+	bool "BOUNCE"
+	depends on BRCM_KTOOLS
+	default n
+	help
+	  This option enables the support for -finstrument-functions.
+
+config BRCM_BOUNCE_EXIT
+	bool "BOUNCE_EXIT"
+	depends on BRCM_BOUNCE
+	default n
+	help
+	  This option enables the instrumentation of kernel function call exit.
+
+config BRCM_BOUNCE_DATAPATH
+	bool "BOUNCE_DATAPATH"
+	depends on BRCM_BOUNCE
+	default n
+	help
+	  This option enables the brute force instrumentation of network data path.
+
+

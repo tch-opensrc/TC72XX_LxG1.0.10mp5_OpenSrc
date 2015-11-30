@@ -1,0 +1,74 @@
+#! /bin/sh
+
+export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin
+export LD_LIBRARY_PATH=/lib:/usr/local/lib
+
+mount -t proc proc /proc
+/bin/mount -a
+#/sbin/inetd
+
+KERNELVER=2.6.30-1.0.10mp3alpha0
+
+# TMOUT=0 means no busybox shell timeout.
+# if you want the busybox shell to timeout after some number of seconds of inactivity,
+# change the 0 to the number of seconds, e.g. 300.
+export TMOUT=0
+
+echo
+firsttime=`echo /var/udhcpd/udhcpd.lease*`
+if [ "$firsttime" = "/var/udhcpd/udhcpd.lease*" ]; then
+ echo "Loading drivers and kernel modules... "
+ echo
+
+# no-op
+# create directory in /var mounted for TMPFS
+ mknod /var/fuse c 10 229
+ chmod a+rw /var/fuse
+ mkdir -p /var/log /var/run /var/state/dhcp /var/ppp /var/udhcpd /var/zebra /var/siproxd /var/cache /var/tmp /var/samba /var/samba/share /var/samba/homes /var/samba/private /var/samba/locks /var/samba/spool /var/samba/lib /var/fyi/sys /mnt/hd var/spool/cups var/spool/cups/tmp /var/cache/cups/rss /var/run/cups/certs /var/log/cups
+
+cp  /etc/smb.conf /var/samba/lib 2>/dev/null
+
+ echo > /var/udhcpd/udhcpd.leases
+ ifconfig lo 127.0.0.1 netmask 255.0.0.0 broadcast 127.255.255.255 up
+# /etc/modules_install /lib/modules/$KERNELVER/extra
+# test -e /lib/modules/$KERNELVER/kernel/net/ipv6/ipv6.ko && insmod /lib/modules/$KERNELVER/kernel/net/ipv6/ipv6.ko
+ test -e /lib/modules/$KERNELVER/extra/bcm_fpm.ko && insmod /lib/modules/$KERNELVER/extra/bcm_fpm.ko
+ test -e /lib/modules/$KERNELVER/extra/bcm_iop.ko && insmod /lib/modules/$KERNELVER/extra/bcm_iop.ko
+ test -e /lib/modules/$KERNELVER/extra/bcm_venet.ko && insmod /lib/modules/$KERNELVER/extra/bcm_venet.ko
+ sleep 3
+ test -e /lib/modules/$KERNELVER/extra/bcm_venet.ko && insmod /lib/modules/$KERNELVER/extra/bcm_virtnihal.ko
+ test -e /lib/modules/$KERNELVER/extra/bcm_usb_host.ko && insmod /lib/modules/$KERNELVER/extra/bcm_usb_host.ko
+ test -e /lib/modules/$KERNELVER/kernel/drivers/net/mii.ko && insmod /lib/modules/$KERNELVER/kernel/drivers/net/mii.ko
+ test -e /lib/modules/$KERNELVER/kernel/drivers/usb/net/usbnet.ko && insmod /lib/modules/$KERNELVER/kernel/drivers/usb/net/usbnet.ko
+ test -e /lib/modules/$KERNELVER/kernel/drivers/usb/net/cdc_ether.ko && insmod /lib/modules/$KERNELVER/kernel/drivers/usb/net/cdc_ether.ko
+ test -e /lib/modules/$KERNELVER/kernel/drivers/scsi/sd_mod.ko && insmod /lib/modules/$KERNELVER/kernel/drivers/scsi/sd_mod.ko
+ test -e /lib/modules/$KERNELVER/kernel/drivers/scsi/sg.ko && insmod /lib/modules/$KERNELVER/kernel/drivers/scsi/sg.ko
+ test -e /lib/modules/$KERNELVER/kernel/drivers/usb/storage/usb-storage.ko && insmod /lib/modules/$KERNELVER/kernel/drivers/usb/storage/usb-storage.ko
+ test -e /lib/modules/$KERNELVER/extra/dspdd.ko && insmod /lib/modules/$KERNELVER/extra/dspdd.ko
+fi
+
+# Mount to apps partition /apps for 3383 processor
+grep 3383 /proc/cpuinfo > /dev/null
+if [ $? -eq 0 ]; then
+    echo "Mounting apps partition"
+    mount -t jffs2 /dev/mtdblock5 /apps
+fi
+
+/bin/lxginit &
+/sbin/udhcpc -b -i eth0 -p /var/run/udhcpc.pid -s /etc/dhcp/dhcpc.script 
+/etc/gwrepair 5
+
+#echo "Starting smbapp"
+#/bin/smbapp 2> /dev/console &
+#telnetd &
+#/etc/init.d/rc.user
+
+echo RUN THE APROUTER BRIDGE SCRIPT
+/etc/init.d/aprBridge
+
+if [ -f /apps/version.txt ]; then
+    /bin/setappsver /apps/version.txt
+fi
+if [ -f /usr/local/etc/init.d/rc.apps ]; then     
+    . /usr/local/etc/init.d/rc.apps
+fi

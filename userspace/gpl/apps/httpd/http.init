@@ -1,0 +1,55 @@
+#!/bin/sh
+#
+# Startup script for the HTTP Daemon
+#
+
+# Source function library.
+. /usr/local/etc/init.d/functions
+
+# This is a workaround.
+# /usr/local/sbin/httpd is symbolic link to /usr/sbin/httpd
+# Busybox pidof and killall doesn't work if /usr/sbin/httpd is directly called
+PROG=/usr/local/sbin/httpd
+
+# Source Services Configuration File
+. /usr/local/etc/sysconfig/services
+RETVAL=0
+
+# See how we were called
+case "$1" in
+    start) 
+        # Check if HTTP service is enabled
+        [ "${HTTP}" != "yes" ] && exit 1
+        echo -n "Starting httpd: "
+        $PROG -h /usr/local/srv/www
+        RETVAL=$?
+        [ $RETVAL -eq 0 ] && echo_success
+        [ $RETVAL -ne 0 ] && echo_failure
+        ;;
+    stop) 
+        pidof httpd > /dev/null
+        RETVAL=$?
+        [ $RETVAL -ne 0 ] && exit 1
+        echo -n "Stopping httpd: "
+        kill $(pidof httpd) 
+        RETVAL=$?
+        [ $RETVAL -eq 0 ] && echo_success 
+        [ $RETVAL -ne 0 ] && echo_failure
+        ;;
+    restart) 
+        $0 stop
+        $0 start
+        RETVAL=$?
+        ;;
+    status) 
+        pidof httpd > /dev/null
+        RETVAL=$?
+        [ $RETVAL -eq 0 ] && echo "httpd $(pidof httpd) is running..."  && exit 0
+        [ $RETVAL -ne 0 ] && echo "httpd is stopped"
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|restart|status}"
+        exit 1
+esac
+
+exit $RETVAL

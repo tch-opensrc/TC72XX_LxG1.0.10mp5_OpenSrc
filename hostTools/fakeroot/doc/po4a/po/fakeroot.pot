@@ -1,0 +1,714 @@
+# SOME DESCRIPTIVE TITLE
+# Copyright (C) YEAR Free Software Foundation, Inc.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# 
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2005-11-16 16:58+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: ENCODING"
+
+# type: TH
+#: ../../doc/fakeroot.1:16
+#, no-wrap
+msgid "fakeroot"
+msgstr ""
+
+# type: TH
+#: ../../doc/fakeroot.1:16
+#, no-wrap
+msgid "6 August 2004"
+msgstr ""
+
+# type: TH
+#: ../../doc/fakeroot.1:16 ../../doc/faked.1:16
+#, no-wrap
+msgid "Debian Project"
+msgstr ""
+
+# type: TH
+#: ../../doc/fakeroot.1:16
+#, no-wrap
+msgid "Debian manual"
+msgstr ""
+
+#.  Manpage by J.H.M. Dassen <jdassen@debian.org>
+#.  and Clint Adams
+# type: SH
+#: ../../doc/fakeroot.1:19 ../../doc/faked.1:19
+#, no-wrap
+msgid "NAME"
+msgstr ""
+
+# type: Plain text
+#: ../../doc/fakeroot.1:22
+msgid ""
+"fakeroot - run a command in an environment faking root privileges for file "
+"manipulation"
+msgstr ""
+
+# type: SH
+#: ../../doc/fakeroot.1:22 ../../doc/faked.1:22
+#, no-wrap
+msgid "SYNOPSIS"
+msgstr ""
+
+# type: Plain text
+#: ../../doc/fakeroot.1:38
+msgid ""
+"B<fakeroot> B<[-l|--lib> I<library]> B<[--faked> I<faked-binary>B<]> B<[-i> "
+"I<load-file>B<]> B<[-s> I<save-file>B<]> B<[-u|--unknown-is-real ]> "
+"B<[-b|--fd-base ]> B<[-h|--help ]> B<[-v|--version ]> B<[--]> B<[command]>"
+msgstr ""
+
+# type: SH
+#: ../../doc/fakeroot.1:38 ../../doc/faked.1:30
+#, no-wrap
+msgid "DESCRIPTION"
+msgstr ""
+
+# type: Plain text
+#: ../../doc/fakeroot.1:49
+msgid ""
+"B<fakeroot> runs a command in an environment wherein it appears to have root "
+"privileges for file manipulation.  This is useful for allowing users to "
+"create archives (tar, ar, .deb etc.) with files in them with root "
+"permissions/ownership.  Without B<fakeroot> one would need to have root "
+"privileges to create the constituent files of the archives with the correct "
+"permissions and ownership, and then pack them up, or one would have to "
+"construct the archives directly, without using the archiver."
+msgstr ""
+
+# type: Plain text
+#: ../../doc/fakeroot.1:60
+msgid ""
+"B<fakeroot> works by replacing the file manipulation library functions "
+"(chmod(2), stat(2) etc.) by ones that simulate the effect the real library "
+"functions would have had, had the user really been root. These wrapper "
+"functions are in a shared library B</usr/lib/libfakeroot.so*> which is "
+"loaded through the B<LD_PRELOAD> mechanism of the dynamic loader. (See "
+"B<ld.so>(8))"
+msgstr ""
+
+# type: Plain text
+#: ../../doc/fakeroot.1:70
+msgid ""
+"If you intend to build packages with B<fakeroot>, please try building the "
+"fakeroot package first: the \"debian/rules build\" stage has a few tests "
+"(testing mostly for bugs in old fakeroot versions). If those tests fail (for "
+"example because you have certain libc5 programs on your system), other "
+"packages you build with fakeroot will quite likely fail too, but possibly in "
+"much more subtle ways."
+msgstr ""
+
+# type: Plain text
+#: ../../doc/fakeroot.1:76
+msgid ""
+"Also, note that it's best not to do the building of the binaries themselves "
+"under fakeroot. Especially configure and friends don't like it when the "
+"system suddenly behaves differently from what they expect. (or, they "
+"randomly unset some environment variables, some of which fakeroot needs)."
+msgstr ""
+
+# type: SH
+#: ../../doc/fakeroot.1:77 ../../doc/faked.1:38
+#, no-wrap
+msgid "OPTIONS"
+msgstr ""
+
+# type: TP
+#: ../../doc/fakeroot.1:78
+#, no-wrap
+msgid "B<-l> I<library>, B<--lib> I<library>"
+msgstr ""
+
+# type: Plain text
+#: ../../doc/fakeroot.1:81
+msgid "Specify an alternative wrapper library."
+msgstr ""
+
+# type: TP
+#: ../../doc/fakeroot.1:81
+#, no-wrap
+msgid "B<--faked>I<\\ binary>"
+msgstr ""
+
+# type: Plain text
+#: ../../doc/fakeroot.1:84
+msgid "Specify an alternative binary to use as faked."
+msgstr ""
+
+# type: TP
+#: ../../doc/fakeroot.1:84
+#, no-wrap
+msgid "B<[--]>I<\\ command>"
+msgstr ""
+
+# type: Plain text
+#: ../../doc/fakeroot.1:88
+msgid ""
+"Any command you want to be ran as fakeroot. Use \\(oq--\\(cq if in the "
+"command you have other options that may confuse fakeroot's option parsing."
+msgstr ""
+
+# type: TP
+#: ../../doc/fakeroot.1:88
+#, no-wrap
+msgid "B<-s>I<\\ save-file>"
+msgstr ""
+
+# type: Plain text
+#: ../../doc/fakeroot.1:99
+msgid ""
+"Save the fakeroot environment to save-file on exit. This file can be used to "
+"restore the environment later using -i. However, this file will leak and "
+"fakeroot will behave in odd ways unless you leave the files touched inside "
+"the fakeroot alone when outside the environment. Still, this can be "
+"useful. For example, it can be used with rsync(1) to back up and restore "
+"whole directory trees complete with user, group and device information "
+"without needing to be root. See I</usr/share/doc/fakeroot/README.saving> for "
+"more details."
+msgstr ""
+
+# type: TP
+#: ../../doc/fakeroot.1:99
+#, no-wrap
+msgid "B<-i>I<\\ load-file>"
+msgstr ""
+
+# type: Plain text
+#: ../../doc/fakeroot.1:106
+msgid ""
+"Load a fakeroot environment previously saved using -s from load-file.  Note "
+"that this does not implicitly save the file, use -s as well for that "
+"behaviour. Using the same file for both -i and -s in a single B<fakeroot> "
+"invocation is safe."
+msgstr ""
+
+# type: TP
+#: ../../doc/fakeroot.1:106
+#, no-wrap
+msgid "B<-u>, B<--unknown-is-real>"
+msgstr ""
+
+# type: Plain text
+#: ../../doc/fakeroot.1:110
+msgid ""
+"Use the real ownership of files previously unknown to fakeroot instead of "
+"pretending they are owned by root:root."
+msgstr ""
+
+# type: TP
+#: ../../doc/fakeroot.1:110
+#, no-wrap
+msgid "B<-b>I<\\ fd>"
+msgstr ""
+
+# type: Plain text
+#: ../../doc/fakeroot.1:116
+msgid ""
+"Specify fd base (TCP mode only). fd is the minimum file descriptor number to "
+"use for TCP connections; this may be important to avoid conflicts with the "
+"file descriptors used by the programs being run under fakeroot."
+msgstr ""
+
+# type: TP
+#: ../../doc/fakeroot.1:116
+#, no-wrap
+msgid "B<-h>"
+msgstr ""
+
+# type: Plain text
+#: ../../doc/fakeroot.1:119
+msgid "Display help."
+msgstr ""
+
+# type: TP
+#: ../../doc/fakeroot.1:119
+#, no-wrap
+msgid "B<-v>"
+msgstr ""
+
+# type: Plain text
+#: ../../doc/fakeroot.1:122
+msgid "Display version."
+msgstr ""
+
+# type: SH
+#: ../../doc/fakeroot.1:123
+#, no-wrap
+msgid "EXAMPLES"
+msgstr ""
+
+# type: Plain text
+#: ../../doc/fakeroot.1:128
+msgid ""
+"Here is an example session with B<fakeroot>.  Notice that inside the fake "
+"root environment file manipulation that requires root privileges succeeds, "
+"but is not really happening."
+msgstr ""
+
+# type: Plain text
+#: ../../doc/fakeroot.1:151
+#, no-wrap
+msgid ""
+"$  whoami\n"
+"joost\n"
+"$ fakeroot /bin/bash\n"
+"#  whoami\n"
+"root\n"
+"# mknod hda3 b 3 1\n"
+"# ls -ld hda3\n"
+"brw-r--r--   1 root     root       3,   1 Jul  2 22:58 hda3\n"
+"# chown joost:root hda3\n"
+"# ls -ld hda3\n"
+"brw-r--r--   1 joost    root       3,   1 Jul  2 22:58 hda3\n"
+"# ls -ld /\n"
+"drwxr-xr-x  20 root     root         1024 Jun 17 21:50 /\n"
+"# chown joost:users /\n"
+"# chmod a+w /\n"
+"# ls -ld /\n"
+"drwxrwxrwx  20 joost    users        1024 Jun 17 21:50 /\n"
+"# exit\n"
+"$ ls -ld /\n"
+"drwxr-xr-x  20 root     root         1024 Jun 17 21:50 //\n"
+"$ ls -ld hda3\n"
+"-rw-r--r--   1 joost    users           0 Jul  2 22:58 hda3\n"
+msgstr ""
+
+# type: Plain text
+#: ../../doc/fakeroot.1:155
+msgid "Only the effects that user B<joost> could do anyway happen for real."
+msgstr ""
+
+# type: Plain text
+#: ../../doc/fakeroot.1:167
+msgid ""
+"B<fakeroot> was specifically written to enable users to create Debian "
+"GNU/Linux packages (in the B<deb(5)> format) without giving them root "
+"privileges.  This can be done by commands like B<dpkg-buildpackage "
+"-rfakeroot> or B<debuild -rfakeroot> (actually, -rfakeroot is default in "
+"debuild nowadays, so you don't need that argument)."
+msgstr ""
+
+# type: SH
+#: ../../doc/fakeroot.1:167
+#, no-wrap
+msgid "SECURITY ASPECTS"
+msgstr ""
+
+# type: Plain text
+#: ../../doc/fakeroot.1:171
+msgid ""
+"B<fakeroot> is a regular, non-setuid program. It does not enhance a user's "
+"privileges, or decrease the system's security."
+msgstr ""
+
+# type: SH
+#: ../../doc/fakeroot.1:171
+#, no-wrap
+msgid "FILES"
+msgstr ""
+
+# type: Plain text
+#: ../../doc/fakeroot.1:174
+msgid ""
+"I</usr/lib/libfakeroot/libfakeroot.so*> The shared library containing the "
+"wrapper functions."
+msgstr ""
+
+# type: SH
+#: ../../doc/fakeroot.1:174
+#, no-wrap
+msgid "ENVIRONMENT"
+msgstr ""
+
+# type: IP
+#: ../../doc/fakeroot.1:176
+#, no-wrap
+msgid "B<FAKEROOTKEY>"
+msgstr ""
+
+# type: Plain text
+#: ../../doc/fakeroot.1:187
+msgid ""
+"The key used to communicate with the fakeroot daemon. Any program started "
+"with the right B<LD_PRELOAD> and a B<FAKEROOTKEY> of a running daemon will "
+"automatically connect to that daemon, and have the same \"fake\" view of the "
+"file system's permissions/ownerships.  (assuming the daemon and connecting "
+"program were started by the same user)."
+msgstr ""
+
+# type: IP
+#: ../../doc/fakeroot.1:187
+#, no-wrap
+msgid "B<LD_LIBRARY_PATH>"
+msgstr ""
+
+# type: IP
+#: ../../doc/fakeroot.1:189
+#, no-wrap
+msgid "B<LD_PRELOAD>"
+msgstr ""
+
+# type: Plain text
+#: ../../doc/fakeroot.1:202
+msgid ""
+"Fakeroot is implemented by wrapping system calls.  This is accomplished by "
+"setting LD_LIBRARY_PATH=/usr/lib/fakeroot and LD_PRELOAD=libfakeroot.so.0.  "
+"That library is loaded before the system's C library, and so most of the "
+"library functions are intercepted by it.  If you need to set either "
+"B<LD_LIBRARY_PATH> or B<LD_PRELOAD> from within a fakeroot environment, it "
+"should be set relative to the given paths, as in "
+"B<LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/foo/bar/>"
+msgstr ""
+
+# type: SH
+#: ../../doc/fakeroot.1:203
+#, no-wrap
+msgid "LIMITATIONS"
+msgstr ""
+
+# type: IP
+#: ../../doc/fakeroot.1:205
+#, no-wrap
+msgid "B<Library versions>"
+msgstr ""
+
+# type: Plain text
+#: ../../doc/fakeroot.1:212
+msgid ""
+"Every command executed within B<fakeroot> needs to be linked to the same "
+"version of the C library as B<fakeroot> itself."
+msgstr ""
+
+# type: IP
+#: ../../doc/fakeroot.1:212
+#, no-wrap
+msgid "B<open()/create()>"
+msgstr ""
+
+# type: Plain text
+#: ../../doc/fakeroot.1:216
+msgid ""
+"fakeroot doesn't wrap open(), create(), etc. So, if user B<joost> does "
+"either"
+msgstr ""
+
+# type: Plain text
+#: ../../doc/fakeroot.1:220
+#, no-wrap
+msgid ""
+"touch foo\n"
+"fakeroot \n"
+"ls -al foo\n"
+msgstr ""
+
+# type: Plain text
+#: ../../doc/fakeroot.1:222
+msgid "or the other way around,"
+msgstr ""
+
+# type: Plain text
+#: ../../doc/fakeroot.1:226
+#, no-wrap
+msgid ""
+"fakeroot\n"
+"touch foo\n"
+"ls -al foo\n"
+msgstr ""
+
+# type: Plain text
+#: ../../doc/fakeroot.1:263
+msgid ""
+"fakeroot has no way of knowing that in the first case, the owner of foo "
+"really should be B<joost> while the second case it should have been "
+"B<root>.  For the Debian packaging, defaulting to giving all \"unknown\" "
+"files uid=gid=0, is always OK. The real way around this is to wrap B<open()> "
+"and B<create()>, but that creates other problems, as demonstrated by the "
+"libtricks package. This package wrapped many more functions, and tried to do "
+"a lot more than B<fakeroot .> It turned out that a minor upgrade of libc "
+"(from one where the B<stat()> function didn't use B<open()> to one with a "
+"B<stat()> function that did (in some cases) use B<open()>), would cause "
+"unexplainable segfaults (that is, the libc6 B<stat()> called the wrapped "
+"B<open()>, which would then call the libc6 B<stat()>, etc).  Fixing them "
+"wasn't all that easy, but once fixed, it was just a matter of time before "
+"another function started to use open(), never mind trying to port it to a "
+"different operating system. Thus I decided to keep the number of functions "
+"wrapped by fakeroot as small as possible, to limit the likelihood of "
+"\\(oqcollisions\\(cq."
+msgstr ""
+
+# type: IP
+#: ../../doc/fakeroot.1:263
+#, no-wrap
+msgid "B<GNU configure (and other such programs)>"
+msgstr ""
+
+# type: Plain text
+#: ../../doc/fakeroot.1:271
+msgid ""
+"fakeroot, in effect, is changing the way the system behaves. Programs that "
+"probe the system like GNU configure may get confused by this (or if they "
+"don't, they may stress fakeroot so much that fakeroot itself becomes "
+"confused). So, it's advisable not to run \"configure\" from within "
+"fakeroot. As configure should be called in the \"debian/rules build\" "
+"target, running \"dpkg-buildpackage -rfakeroot\" correctly takes care of "
+"this."
+msgstr ""
+
+# type: SH
+#: ../../doc/fakeroot.1:271 ../../doc/faked.1:66
+#, no-wrap
+msgid "BUGS"
+msgstr ""
+
+# type: Plain text
+#: ../../doc/fakeroot.1:281
+msgid ""
+"It doesn't wrap open(). This isn't bad by itself, but if a program does "
+"open(\"file\", O_WRONLY, 000), writes to file \"file\", closes it, and then "
+"again tries to open to read the file, then that open fails, as the mode of "
+"the file will be 000. The bug is that if root does the same, open() will "
+"succeed, as the file permissions aren't checked at all for root. I choose "
+"not to wrap open(), as open() is used by many other functions in libc (also "
+"those that are already wrapped), thus creating loops (or possible future "
+"loops, when the implementation of various libc functions slightly change)."
+msgstr ""
+
+# type: SH
+#: ../../doc/fakeroot.1:281 ../../doc/faked.1:76
+#, no-wrap
+msgid "COPYING"
+msgstr ""
+
+# type: Plain text
+#: ../../doc/fakeroot.1:285 ../../doc/faked.1:80
+msgid ""
+"B<fakeroot> is distributed under the GNU General Public License.  (GPL 2.0 "
+"or greater)."
+msgstr ""
+
+# type: SH
+#: ../../doc/fakeroot.1:285 ../../doc/faked.1:80
+#, no-wrap
+msgid "AUTHORS"
+msgstr ""
+
+# type: TP
+#: ../../doc/fakeroot.1:286 ../../doc/faked.1:81
+#, no-wrap
+msgid "joost witteveen"
+msgstr ""
+
+# type: Plain text
+#: ../../doc/fakeroot.1:289 ../../doc/faked.1:84
+msgid "E<lt>I<joostje@debian.org>E<gt>"
+msgstr ""
+
+# type: TP
+#: ../../doc/fakeroot.1:289 ../../doc/faked.1:84
+#, no-wrap
+msgid "Clint Adams"
+msgstr ""
+
+# type: Plain text
+#: ../../doc/fakeroot.1:292 ../../doc/faked.1:87
+msgid "E<lt>I<schizo@debian.org>E<gt>"
+msgstr ""
+
+# type: TP
+#: ../../doc/fakeroot.1:292 ../../doc/faked.1:87
+#, no-wrap
+msgid "Timo Savola"
+msgstr ""
+
+# type: SH
+#: ../../doc/fakeroot.1:294 ../../doc/faked.1:89
+#, no-wrap
+msgid "MANUAL PAGE"
+msgstr ""
+
+# type: Plain text
+#: ../../doc/fakeroot.1:298
+msgid ""
+"mostly by J.H.M. Dassen E<lt>jdassen@debian.orgE<gt> Rather a lot "
+"mods/additions by joost and Clint."
+msgstr ""
+
+# type: SH
+#: ../../doc/fakeroot.1:298 ../../doc/faked.1:93
+#, no-wrap
+msgid "SEE ALSO"
+msgstr ""
+
+# type: Plain text
+#: ../../doc/fakeroot.1:303
+msgid ""
+"B<faked>(1)  B<dpkg-buildpackage>(1), B<debuild>(1)  "
+"B</usr/share/doc/fakeroot/DEBUG>"
+msgstr ""
+
+# type: TH
+#: ../../doc/faked.1:16
+#, no-wrap
+msgid "faked"
+msgstr ""
+
+# type: TH
+#: ../../doc/faked.1:16
+#, no-wrap
+msgid "17 June 2004"
+msgstr ""
+
+# type: TH
+#: ../../doc/faked.1:16
+#, no-wrap
+msgid "Debian GNU/Linux manual"
+msgstr ""
+
+# type: Plain text
+#: ../../doc/faked.1:22
+msgid ""
+"faked - daemon that remembers fake ownership/permissions of files "
+"manipulated by fakeroot processes."
+msgstr ""
+
+# type: Plain text
+#: ../../doc/faked.1:30
+msgid ""
+"B<faked> B<[--debug] [--foreground] [--cleanup] [--key> I<msg-key>B<]> "
+"B<[--load] [--save-file> I<save-file>B<]> B<[--port> I<TCP-port>B<]>"
+msgstr ""
+
+# type: Plain text
+#: ../../doc/faked.1:37
+msgid ""
+"If a fakeroot process wants to change the ownership of a file, then B<faked> "
+"is the process that remembers that new owner. If later the same fakeroot "
+"process does a stat() for that filename, then the libfakeroot wrapped stat() "
+"call will first ask faked for the fake ownership etc of that file, and then "
+"report it."
+msgstr ""
+
+# type: TP
+#: ../../doc/faked.1:39
+#, no-wrap
+msgid "B<--debug>"
+msgstr ""
+
+# type: Plain text
+#: ../../doc/faked.1:42
+msgid "Print debugging information on stderr."
+msgstr ""
+
+# type: TP
+#: ../../doc/faked.1:42
+#, no-wrap
+msgid "B<--foreground>"
+msgstr ""
+
+# type: Plain text
+#: ../../doc/faked.1:45
+msgid "Don't fork into the background."
+msgstr ""
+
+# type: TP
+#: ../../doc/faked.1:45
+#, no-wrap
+msgid "B<--cleanup \\ number>"
+msgstr ""
+
+# type: Plain text
+#: ../../doc/faked.1:48
+msgid "Cleanup the semaphores."
+msgstr ""
+
+# type: TP
+#: ../../doc/faked.1:48
+#, no-wrap
+msgid "B<--key \\ key-number>"
+msgstr ""
+
+# type: Plain text
+#: ../../doc/faked.1:52
+msgid ""
+"Don't allocate a new communication channel, but use channel specified by "
+"key. (If the specified channel doesn't exist, it's created)."
+msgstr ""
+
+# type: TP
+#: ../../doc/faked.1:52
+#, no-wrap
+msgid "B<--save-file \\ save-file>"
+msgstr ""
+
+# type: Plain text
+#: ../../doc/faked.1:55
+msgid "Save the environment to save-file on exit."
+msgstr ""
+
+# type: TP
+#: ../../doc/faked.1:55
+#, no-wrap
+msgid "B<--load>"
+msgstr ""
+
+# type: Plain text
+#: ../../doc/faked.1:58
+msgid "Load a previously saved environment from the standard input."
+msgstr ""
+
+# type: TP
+#: ../../doc/faked.1:58
+#, no-wrap
+msgid "B<--unknown-is-real>"
+msgstr ""
+
+# type: Plain text
+#: ../../doc/faked.1:62
+msgid ""
+"Use real ownership of previously-unknown files instead of setting them to "
+"root:root."
+msgstr ""
+
+# type: TP
+#: ../../doc/faked.1:62
+#, no-wrap
+msgid "B<--port \\ tcp-port>"
+msgstr ""
+
+# type: Plain text
+#: ../../doc/faked.1:65
+msgid "Use TCP port tcp-port."
+msgstr ""
+
+# type: Plain text
+#: ../../doc/faked.1:76
+msgid ""
+"None so far. Be warned, though: although I've written quite a few much "
+"larger (and smaller) programs, I've never written anything that was as tiny "
+"as B<fakeroot>, had as many bugs as B<fakeroot>, and still was as usable as, "
+"say, B<fakeroot> version 0.0_3, the first version that could be used to "
+"build itself."
+msgstr ""
+
+# type: Plain text
+#: ../../doc/faked.1:93
+msgid ""
+"mostly by J.H.M. Dassen E<lt>jdassen@debian.orgE<gt> mods/additions by joost "
+"and Clint."
+msgstr ""
+
+# type: Plain text
+#: ../../doc/faked.1:97
+msgid ""
+"B<fakeroot>(1), B<dpkg-buildpackage>(1), B<debuild>(1)  "
+"B</usr/share/doc/fakeroot/DEBUG>"
+msgstr ""

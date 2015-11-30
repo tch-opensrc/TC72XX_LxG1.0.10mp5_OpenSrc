@@ -1,0 +1,21 @@
+Source: fakeroot
+Section: utils
+Priority: optional
+Build-Depends: sharutils, gcc-multilib [amd64 i386 kfreebsd-amd64 powerpc s390 sparc], lib64c-dev [i386 powerpc s390 sparc], lib32c-dev [amd64 kfreebsd-amd64 ppc64], libacl1-dev
+Maintainer: Clint Adams <schizo@debian.org>
+Standards-Version: 3.7.3
+Vcs-Arch: http://arch.debian.org/arch/fakeroot/fakeroot/
+Vcs-Browser: http://arch.debian.org/cgi-bin/archzoom.cgi/fakeroot@packages.debian.org--fakeroot?expand
+
+Package: fakeroot
+Architecture: any
+Depends: ${shlibs:Depends}
+Description: Gives a fake root environment
+ This package is intended to enable something like:
+   dpkg-buildpackage -rfakeroot
+ i.e. to remove the need to become root for a package build.
+ This is done by setting LD_PRELOAD to libfakeroot.so,
+ which provides wrappers around getuid, chown, chmod, mknod, 
+ stat, and so on, thereby creating a fake root environment.
+ .
+ fakeroot requires SYSV IPC or TCP to operate.

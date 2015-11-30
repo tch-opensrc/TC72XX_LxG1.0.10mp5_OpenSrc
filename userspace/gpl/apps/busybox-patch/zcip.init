@@ -1,0 +1,16 @@
+#!/bin/sh
+#
+# Startup script for the Zcip
+#
+
+echo -n "Starting zcip: "
+
+zcip -q -v $interface /etc/dhcp/zcip.script
+
+ip route add default dev $interface scope link
+
+sourceIP="$(ifconfig $interface|grep 'inet addr' | sed s/[a-z:]//g | awk '{print $1}')"
+if [ ${#sourceIP} -ge 7 ]
+then
+arping -U -s $sourceIP 0.0.0.0 -w 1
+fi

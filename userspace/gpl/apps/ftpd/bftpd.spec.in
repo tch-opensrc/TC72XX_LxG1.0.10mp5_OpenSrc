@@ -1,0 +1,19 @@
+Summary: An inetd-based Linux FTP daemon.
+Name: bftpd
+Version: VERSION
+Release: 1
+Copyright: GPL
+Group: System Environment/Daemons
+Source: http://c.codercity.de/bruksoft/bftpd/bftpd-VERSION.tar.gz
+
+%description
+bftpd is a Linux FTP server with chroot and setreuid. Not all FTP commands are
+included. It doesn't need special home directory preparation and accesses
+either the user's home directory or its .ftp subdirectory, and user
+authentication is via passwd/shadow or PAM.
+
+%files
+%defattr (-, root, root)
+/etc/bftpd.conf
+/usr/sbin/bftpd
+

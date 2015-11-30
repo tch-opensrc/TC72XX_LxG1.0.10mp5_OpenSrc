@@ -1,0 +1,52 @@
+#!/bin/sh
+#
+# Startup script for the cups daemon
+#
+
+# Source function library.
+. /usr/local/etc/init.d/functions
+
+PROG=/usr/local/sbin/cupsd
+
+# Source Services Configuration File
+. /usr/local/etc/sysconfig/services
+RETVAL=0
+
+# See how we were called
+case "$1" in
+    start) 
+        # Check if avahi service is enabled
+        [ "${CUPS}" != "yes" ] && exit 1
+        echo -n "Starting cupsd: "
+        $PROG
+        RETVAL=$?
+        [ $RETVAL -eq 0 ] && echo_success
+        [ $RETVAL -ne 0 ] && echo_failure
+        ;;
+    stop) 
+        pidof $(basename $PROG) > /dev/null
+        RETVAL=$?
+        [ $RETVAL -ne 0 ] && exit 1
+        echo -n "Stopping cupsd: "
+        kill $(pidof $(basename $PROG)) 
+        RETVAL=$?
+        [ $RETVAL -eq 0 ] && echo_success 
+        [ $RETVAL -ne 0 ] && echo_failure
+        ;;
+    restart) 
+        $0 stop
+        $0 start
+        RETVAL=$?
+        ;;
+    status) 
+        pidof $(basename $PROG)  > /dev/null
+        RETVAL=$?
+        [ $RETVAL -eq 0 ] && echo "cupsd $(pidof $(basename $PROG)) is running..."  && exit 0
+        [ $RETVAL -ne 0 ] && echo "cupsd is stopped"
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|restart|status}"
+        exit 1
+esac
+
+exit $RETVAL

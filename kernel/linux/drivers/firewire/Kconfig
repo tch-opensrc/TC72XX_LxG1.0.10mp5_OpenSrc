@@ -1,0 +1,79 @@
+comment "A new alternative FireWire stack is available with EXPERIMENTAL=y"
+	depends on EXPERIMENTAL=n
+
+comment "Enable only one of the two stacks, unless you know what you are doing"
+	depends on EXPERIMENTAL
+
+config FIREWIRE
+	tristate "New FireWire stack, EXPERIMENTAL"
+	depends on EXPERIMENTAL
+	select CRC_ITU_T
+	help
+	  This is the "Juju" FireWire stack, a new alternative implementation
+	  designed for robustness and simplicity.  You can build either this
+	  stack, or the old stack (the ieee1394 driver, ohci1394 etc.) or both.
+	  Please read http://ieee1394.wiki.kernel.org/index.php/Juju_Migration
+	  before you enable the new stack.
+
+	  To compile this driver as a module, say M here: the module will be
+	  called firewire-core.
+
+	  This module functionally replaces ieee1394, raw1394, and video1394.
+	  To access it from application programs, you generally need at least
+	  libraw1394 version 2.  IIDC/DCAM applications also need libdc1394
+	  version 2.  No libraries are required to access storage devices
+	  through the firewire-sbp2 driver.
+
+config FIREWIRE_OHCI
+	tristate "OHCI-1394 controllers"
+	depends on PCI && FIREWIRE
+	help
+	  Enable this driver if you have a FireWire controller based
+	  on the OHCI specification.  For all practical purposes, this
+	  is the only chipset in use, so say Y here.
+
+	  To compile this driver as a module, say M here:  The module will be
+	  called firewire-ohci.  It replaces ohci1394 of the classic IEEE 1394
+	  stack.
+
+	  NOTE:
+
+	  You should only build either firewire-ohci or the old ohci1394 driver,
+	  but not both.  If you nevertheless want to install both, you should
+	  configure them only as modules and blacklist the driver(s) which you
+	  don't want to have auto-loaded.  Add either
+
+	      blacklist firewire-ohci
+	  or
+	      blacklist ohci1394
+	      blacklist video1394
+	      blacklist dv1394
+
+	  to /etc/modprobe.conf or /etc/modprobe.d/* and update modprobe.conf
+	  depending on your distribution.  The latter two modules should be
+	  blacklisted together with ohci1394 because they depend on ohci1394.
+
+	  If you have an old modprobe which doesn't implement the blacklist
+	  directive, use "install modulename /bin/true" for the modules to be
+	  blacklisted.
+
+config FIREWIRE_OHCI_DEBUG
+	bool
+	depends on FIREWIRE_OHCI
+	default y
+
+config FIREWIRE_SBP2
+	tristate "Storage devices (SBP-2 protocol)"
+	depends on FIREWIRE && SCSI
+	help
+	  This option enables you to use SBP-2 devices connected to a
+	  FireWire bus.  SBP-2 devices include storage devices like
+	  harddisks and DVD drives, also some other FireWire devices
+	  like scanners.
+
+	  To compile this driver as a module, say M here:  The module will be
+	  called firewire-sbp2.  It replaces sbp2 of the classic IEEE 1394
+	  stack.
+
+	  You should also enable support for disks, CD-ROMs, etc. in the SCSI
+	  configuration section.

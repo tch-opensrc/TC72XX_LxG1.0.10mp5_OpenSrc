@@ -1,0 +1,59 @@
+#!/bin/sh
+#
+# Startup script for the mt-daapd Daemon
+#
+
+# Source function library.
+. /usr/local/etc/init.d/functions
+
+
+PIDD=/usr/local/var/run/mt-daapd
+PIDF=$PIDD/pid
+PROG=/usr/local/sbin/mt-daapd
+
+# Source Services Configuration File
+. /usr/local/etc/sysconfig/services
+RETVAL=0
+
+# See how we were called
+case "$1" in
+    start) 
+        # Check if firefly service is enabled
+        [ "${FIREFLY}" != "yes" ] && exit 1
+        echo -n "Starting mt-daapd: "
+        mkdir -p $PIDD
+        $PROG -P $PIDF -c /usr/local/etc/mt-daapd.conf
+        RETVAL=$?
+        [ $RETVAL -eq 0 ] && echo_success
+        [ $RETVAL -ne 0 ] && echo_failure
+        ;;
+    stop) 
+        [ ! -f $PIDF ] && exit 1
+        echo -n "Stopping mt-daapd: "
+        $PROG -k -P $PIDF -c /usr/local/etc/mt-daapd.conf 
+        RETVAL=$?
+        [ $RETVAL -eq 0 ] && rm -f $PIDF && echo_success && exit 0
+        kill $(cat $PIDF)
+        RETVAL=$?
+        [ $RETVAL -eq 0 ] && rm -f $PIDF && echo_success && exit 0
+        [ $RETVAL -ne 0 ] && echo_failure
+        ;;
+    restart) 
+        $0 stop
+        $0 start
+        RETVAL=$?
+        ;;
+    status) 
+        pidof $(basename $PROG)  > /dev/null
+        RETVAL=$?
+        [ $RETVAL -eq 0 ] && echo "mt-daapd $(pidof $(basename $PROG)) is running..."  && exit 0
+        [ -f $PIDF ] && echo "mt-daapd is dead but pid file $PIDF exist" && exit 2
+        [ $RETVAL -ne 0 ] && echo "mt-daapd is stopped"
+        RETVAL=1
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|restart|status}"
+        exit 1
+esac
+
+exit $RETVAL

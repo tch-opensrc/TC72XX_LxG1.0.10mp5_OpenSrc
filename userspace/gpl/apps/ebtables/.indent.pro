@@ -1,0 +1,3 @@
+--k-and-r-style
+--indent-level8
+--tab-size8

@@ -1,0 +1,1466 @@
+This is zebra.info, produced by makeinfo version 4.0b from zebra.texi.
+
+INFO-DIR-SECTION Routing Software:
+START-INFO-DIR-ENTRY
+* Zebra: (zebra).		The GNU Zebra routing software
+END-INFO-DIR-ENTRY
+
+   This file documents the GNU Zebra software which manages common
+TCP/IP routing protocols.
+
+   This is Edition 0.1, last updated 28 June 2002 of `The GNU Zebra
+Manual', for Zebra Version 0.93.
+
+   Copyright (C) 1999, 2000, 2001, 2002 Kunihiro Ishiguro
+
+   Permission is granted to make and distribute verbatim copies of this
+manual provided the copyright notice and this permission notice are
+preserved on all copies.
+
+   Permission is granted to copy and distribute modified versions of
+this manual under the conditions for verbatim copying, provided that the
+entire resulting derived work is distributed under the terms of a
+permission notice identical to this one.
+
+   Permission is granted to copy and distribute translations of this
+manual into another language, under the above conditions for modified
+versions, except that this permission notice may be stated in a
+translation approved by Kunihiro Ishiguro.
+
+
+File: zebra.info,  Node: RIP Authentication,  Next: RIP Timers,  Prev: RIP route-map,  Up: RIP
+
+RIP Authentication
+==================
+
+ - Interface command: ip rip authentication mode md5
+ - Interface command: no ip rip authentication mode md5
+     Set the interface with RIPv2 MD5 authentication.
+
+ - Interface command: ip rip authentication mode text
+ - Interface command: no ip rip authentication mode text
+     Set the interface with RIPv2 simple password authentication.
+
+ - Interface command: ip rip authentication string STRING
+ - Interface command: no ip rip authentication string STRING
+     RIP version 2 has simple text authentication.  This command sets
+     authentication string.  The string must be shorter than 16
+     characters.
+
+ - Interface command: ip rip authentication key-chain KEY-CHAIN
+ - Interface command: no ip rip authentication key-chain KEY-CHAIN
+     Specifiy Keyed MD5 chain.
+
+     !
+     key chain test
+      key 1
+       key-string test
+     !
+     interface eth1
+      ip rip authentication mode md5
+      ip rip authentication key-chain test
+     !
+
+
+File: zebra.info,  Node: RIP Timers,  Next: Show RIP Information,  Prev: RIP Authentication,  Up: RIP
+
+RIP Timers
+==========
+
+ - RIP command: timers basic UPDATE TIMEOUT GARBAGE
+     RIP protocol has several timers.  User can configure those timers'
+     values by `timers basic' command.
+
+     The default settings for the timers are as follows:
+
+        * The update timer is 30 seconds. Every update timer seconds,
+          the RIP process is awakened to send an unsolicited Response
+          message containing the complete routing table to all
+          neighboring RIP routers.
+
+        * The timeout timer is 180 seconds. Upon expiration of the
+          timeout, the route is no longer valid; however, it is
+          retained in the routing table for a short time so that
+          neighbors can be notified that the route has been dropped.
+
+        * The garbage collect timer is 120 seconds.  Upon expiration of
+          the garbage-collection timer, the route is finally removed
+          from the routing table.
+
+
+     The `timers basic' command allows the the default values of the
+     timers listed above to be changed.
+
+ - RIP command: no timers basic
+     The `no timers basic' command will reset the timers to the default
+     settings listed above.
+
+
+File: zebra.info,  Node: Show RIP Information,  Next: RIP Debug Commands,  Prev: RIP Timers,  Up: RIP
+
+Show RIP Information
+====================
+
+   To display RIP routes.
+
+ - Command: show ip rip
+     Show RIP routes.
+
+   The command displays all RIP routes. For routes that are received
+through RIP, this command will display the time the packet was sent and
+the tag information.  This command will also display this information
+for routes redistributed into RIP.
+
+ - Command: show ip protocols
+     The command displays current RIP status.  It includes RIP timer,
+     filtering, version, RIP enabled interface and RIP peer inforation.
+
+     ripd> show ip protocols
+     Routing Protocol is "rip"
+       Sending updates every 30 seconds with +/-50%, next due in 35 seconds
+       Timeout after 180 seconds, garbage collect after 120 seconds
+       Outgoing update filter list for all interface is not set
+       Incoming update filter list for all interface is not set
+       Default redistribution metric is 1
+       Redistributing: kernel connected
+       Default version control: send version 2, receive version 2
+         Interface        Send  Recv
+       Routing for Networks:
+         eth0
+         eth1
+         1.1.1.1
+         203.181.89.241
+       Routing Information Sources:
+         Gateway          BadPackets BadRoutes  Distance Last Update
+
+
+File: zebra.info,  Node: RIP Debug Commands,  Prev: Show RIP Information,  Up: RIP
+
+RIP Debug Commands
+==================
+
+   Debug for RIP protocol.
+
+ - Command: debug rip events
+     Debug rip events.
+
+   `debug rip' will show RIP events.  Sending and receiving packets,
+timers, and changes in interfaces are events shown with `ripd'.
+
+ - Command: debug rip packet
+     Debug rip packet.
+
+   `debug rip packet' will display detailed information about the RIP
+packets.  The origin and port number of the packet as well as a packet
+dump is shown.
+
+ - Command: debug rip zebra
+     Debug rip between zebra communication.
+
+   This command will show the communication between `ripd' and `zebra'.
+The main information will include addition and deletion of paths to the
+kernel and the sending and receiving of interface information.
+
+ - Command: show debugging rip
+     Display `ripd''s debugging option.
+
+   `show debugging rip' will show all information currently set for ripd
+debug.
+
+
+File: zebra.info,  Node: RIPng,  Next: OSPFv2,  Prev: RIP,  Up: Top
+
+RIPng
+*****
+
+   `ripngd' supports the RIPng protocol as described in RFC2080.  It's
+an IPv6 reincarnation of the RIP protocol.
+
+* Menu:
+
+* Invoking ripngd::
+* ripngd Configuration::
+* ripngd Terminal Mode Commands::
+* ripngd Filtering Commands::
+
+
+File: zebra.info,  Node: Invoking ripngd,  Next: ripngd Configuration,  Prev: RIPng,  Up: RIPng
+
+Invoking ripngd
+===============
+
+   There are no `ripngd' specific invocation options.  Common options
+can be specified (*note Common Invocation Options::).
+
+
+File: zebra.info,  Node: ripngd Configuration,  Next: ripngd Terminal Mode Commands,  Prev: Invoking ripngd,  Up: RIPng
+
+ripngd Configuration
+====================
+
+   Currently ripngd supports the following commands:
+
+ - Command: router ripng
+     Enable RIPng.
+
+ - RIPng Command: flush_timer TIME
+     Set flush timer.
+
+ - RIPng Command: network NETWORK
+     Set RIPng enabled interface by NETWORK
+
+ - RIPng Command: network IFNAME
+     Set RIPng enabled interface by IFNAME
+
+ - RIPng Command: route NETWORK
+     Set RIPng static routing announcement of NETWORK.
+
+ - Command: router zebra
+     This command is the default and does not appear in the
+     configuration.  With this statement, RIPng routes go to the
+     `zebra' daemon.
+
+
+File: zebra.info,  Node: ripngd Terminal Mode Commands,  Next: ripngd Filtering Commands,  Prev: ripngd Configuration,  Up: RIPng
+
+ripngd Terminal Mode Commands
+=============================
+
+ - Command: show ip ripng
+
+ - Command: show debugging ripng
+
+ - Command: debug ripng events
+
+ - Command: debug ripng packet
+
+ - Command: debug ripng zebra
+
+
+File: zebra.info,  Node: ripngd Filtering Commands,  Prev: ripngd Terminal Mode Commands,  Up: RIPng
+
+ripngd Filtering Commands
+=========================
+
+ - Command: distribute-list ACCESS_LIST (in|out) IFNAME
+     You can apply an access-list to the interface using the
+     `distribute-list' command.  ACCESS_LIST is an access-list name.
+     DIRECT is `in' or `out'.  If DIRECT is `in', the access-list is
+     applied only to incoming packets.
+
+          distribute-list local-only out sit1
+
+
+File: zebra.info,  Node: OSPFv2,  Next: OSPFv3,  Prev: RIPng,  Up: Top
+
+OSPFv2
+******
+
+   `ospfd' provides an OSPF version 2 routing protocol as described in
+RFC2328.  OSPF is one of IGPs (Interior Gateway Protocols).  Compared
+with RIP, OSPF can serve much more networks and period of convergence is
+very short.  OSPF is widely used in large networks such as ISP backbone
+and enterprise networks.
+
+* Menu:
+
+* Configuring ospfd::
+* OSPF router::
+* OSPF area::
+* OSPF interface::
+* Redistribute routes to OSPF::
+* Showing OSPF information::
+* Debugging OSPF::
+
+
+File: zebra.info,  Node: Configuring ospfd,  Next: OSPF router,  Prev: OSPFv2,  Up: OSPFv2
+
+Configuring ospfd
+=================
+
+   There is no `ospfd' specific options.  Common options can be
+specified (*note Common Invocation Options::) to `ospfd'.  `ospfd'
+needs interface information from `zebra'.  So please make it sure
+`zebra' is running before invoking `ospfd'.
+
+   Like other daemons, `ospfd' configuration is done in OSPF specific
+configuration file `ospfd.conf'.
+
+
+File: zebra.info,  Node: OSPF router,  Next: OSPF area,  Prev: Configuring ospfd,  Up: OSPFv2
+
+OSPF router
+===========
+
+   To start OSPF process you have to specify the OSPF router.  As of
+this writing, `ospfd' does not support multiple OSPF processes.
+
+ - Command: router ospf
+ - Command: no router ospf
+     Enable or disable the OSPF process.  `ospfd' does not yet support
+     multiple OSPF processes.  So you can not specify an OSPF process
+     number.
+
+ - OSPF Command: ospf router-id A.B.C.D
+ - OSPF Command: no ospf router-id
+
+ - OSPF Command: ospf abr-type TYPE
+ - OSPF Command: no ospf abr-type TYPE
+     TYPE can be cisco|ibm|shortcut|standard
+
+ - OSPF Command: ospf rfc1583compatibility
+ - OSPF Command: no ospf rfc1583compatibility
+
+ - OSPF Command: passive interface INTERFACE
+ - OSPF Command: no passive interface INTERFACE
+
+ - OSPF Command: timers spf <0-4294967295> <0-4294967295>
+ - OSPF Command: no timers spf
+
+ - OSPF Command: refresh group-limit <0-10000>
+ - OSPF Command: refresh per-slice <0-10000>
+ - OSPF Command: refresh age-diff <0-10000>
+
+ - OSPF Command: auto-cost refrence-bandwidth <1-4294967>
+ - OSPF Command: no auto-cost refrence-bandwidth
+
+ - OSPF Command: network A.B.C.D/M area A.B.C.D
+ - OSPF Command: network A.B.C.D/M area <0-4294967295>
+ - OSPF Command: no network A.B.C.D/M area A.B.C.D
+ - OSPF Command: no network A.B.C.D/M area <0-4294967295>
+     This command specifies the OSPF enabled interface.  If the
+     interface has an address of 10.0.0.1/8 then the command below
+     provides network information to the ospf routers
+          router ospf
+           network 10.0.0.0/8 area 0
+     the network command's mask length should be the same as the
+     interface address's mask.
+
+
+File: zebra.info,  Node: OSPF area,  Next: OSPF interface,  Prev: OSPF router,  Up: OSPFv2
+
+OSPF area
+=========
+
+ - OSPF Command: area A.B.C.D range A.B.C.D/M
+ - OSPF Command: area <0-4294967295> range A.B.C.D/M
+ - OSPF Command: no area A.B.C.D range A.B.C.D/M
+ - OSPF Command: no area <0-4294967295> range A.B.C.D/M
+
+ - OSPF Command: area A.B.C.D range IPV4_PREFIX suppress
+ - OSPF Command: no area A.B.C.D range IPV4_PREFIX suppress
+ - OSPF Command: area A.B.C.D range IPV4_PREFIX substitute IPV4_PREFIX
+ - OSPF Command: no area A.B.C.D range IPV4_PREFIX substitute
+IPV4_PREFIX
+
+ - OSPF Command: area A.B.C.D virtual-link A.B.C.D
+ - OSPF Command: area <0-4294967295> virtual-link A.B.C.D
+ - OSPF Command: no area A.B.C.D virtual-link A.B.C.D
+ - OSPF Command: no area <0-4294967295> virtual-link A.B.C.D
+
+ - OSPF Command: area A.B.C.D shortcut
+ - OSPF Command: area <0-4294967295> shortcut
+ - OSPF Command: no area A.B.C.D shortcut
+ - OSPF Command: no area <0-4294967295> shortcut
+
+ - OSPF Command: area A.B.C.D stub
+ - OSPF Command: area <0-4294967295> stub
+ - OSPF Command: no area A.B.C.D stub
+ - OSPF Command: no area <0-4294967295> stub
+
+ - OSPF Command: area A.B.C.D stub no-summary
+ - OSPF Command: area <0-4294967295> stub no-summary
+ - OSPF Command: no area A.B.C.D stub no-summary
+ - OSPF Command: no area <0-4294967295> stub no-summary
+
+ - OSPF Command: area A.B.C.D default-cost <0-16777215>
+ - OSPF Command: no area A.B.C.D default-cost <0-16777215>
+
+ - OSPF Command: area A.B.C.D export-list NAME
+ - OSPF Command: area <0-4294967295> export-list NAME
+ - OSPF Command: no area A.B.C.D export-list NAME
+ - OSPF Command: no area <0-4294967295> export-list NAME
+
+ - OSPF Command: area A.B.C.D import-list NAME
+ - OSPF Command: area <0-4294967295> import-list NAME
+ - OSPF Command: no area A.B.C.D import-list NAME
+ - OSPF Command: no area <0-4294967295> import-list NAME
+
+ - OSPF Command: area A.B.C.D authentication
+ - OSPF Command: area <0-4294967295> authentication
+ - OSPF Command: no area A.B.C.D authentication
+ - OSPF Command: no area <0-4294967295> authentication
+
+ - OSPF Command: area A.B.C.D authentication message-digest
+ - OSPF Command: area <0-4294967295> authentication message-digest
+
+
+File: zebra.info,  Node: OSPF interface,  Next: Redistribute routes to OSPF,  Prev: OSPF area,  Up: OSPFv2
+
+OSPF interface
+==============
+
+ - Interface Command: ip ospf authentication-key AUTH_KEY
+ - Interface Command: no ip ospf authentication-key
+     Set OSPF authentication key to a simple password.  After setting
+     AUTH_KEY, all OSPF packets are authenticated. AUTH_KEY has length
+     up to 8 chars.
+
+ - Interface Command: ip ospf message-digest-key KEYID md5 KEY
+ - Interface Command: no ip ospf message-digest-key
+     Set OSPF authentication key to a cryptographic password.  The
+     cryptographic algorithm is MD5.  KEYID identifies secret key used
+     to create the message digest.  KEY is the actual message digest
+     key up to 16 chars.
+
+ - Interface Command: ip ospf cost <1-65535>
+ - Interface Command: no ip ospf cost
+     Set link cost for the specified interface.  The cost value is set
+     to router-LSA's metric field and used for SPF calculation.
+
+ - Interface Command: ip ospf dead-interval <1-65535>
+ - Interface Command: no ip ospf dead-interval
+     Set number of seconds for RouterDeadInterval timer value used for
+     Wait Timer and Inactivity Timer.  This value must be the same for
+     all routers attached to a common network.  The default value is 40
+     seconds.
+
+ - Interface Command: ip ospf hello-interval <1-65535>
+ - Interface Command: no ip ospf hello-interval
+     Set number of seconds for HelloInterval timer value.  Setting this
+     value, Hello packet will be sent every timer value seconds on the
+     specified interface.  This value must be the same for all routers
+     attached to a common network.  The default value is 10 seconds.
+
+ - Interface Command: ip ospf network
+(broadcast|non-broadcast|point-to-multipoint|point-to-point)
+ - Interface Command: no ip ospf network
+     Set explicitly network type for specifed interface.
+
+ - Interface Command: ip ospf priority <0-255>
+ - Interface Command: no ip ospf priority
+     Set RouterPriority integer value.  Setting higher value, router
+     will be more eligible to become Designated Router.  Setting the
+     value to 0, router is no longer eligible to Designated Router.
+     The default value is 1.
+
+ - Interface Command: ip ospf retransmit-interval <1-65535>
+ - Interface Command: no ip ospf retransmit interval
+     Set number of seconds for RxmtInterval timer value.  This value is
+     used when retransmitting Database Description and Link State
+     Request packets.  The default value is 5 seconds.
+
+ - Interface Command: ip ospf transmit-delay
+ - Interface Command: no ip ospf transmit-delay
+     Set number of seconds for InfTransDelay value.  LSAs' age should be
+     incremented by this value when transmitting.  The default value is
+     1 seconds.
+
+
+File: zebra.info,  Node: Redistribute routes to OSPF,  Next: Showing OSPF information,  Prev: OSPF interface,  Up: OSPFv2
+
+Redistribute routes to OSPF
+===========================
+
+ - OSPF Command: redistribute (kernel|connected|static|rip|bgp)
+ - OSPF Command: redistribute (kernel|connected|static|rip|bgp)
+ROUTE-MAP
+ - OSPF Command: redistribute (kernel|connected|static|rip|bgp)
+metric-type (1|2)
+ - OSPF Command: redistribute (kernel|connected|static|rip|bgp)
+metric-type (1|2) route-map WORD
+ - OSPF Command: redistribute (kernel|connected|static|rip|bgp) metric
+<0-16777214>
+ - OSPF Command: redistribute (kernel|connected|static|rip|bgp) metric
+<0-16777214> route-map WORD
+ - OSPF Command: redistribute (kernel|connected|static|rip|bgp)
+metric-type (1|2) metric <0-16777214>
+ - OSPF Command: redistribute (kernel|connected|static|rip|bgp)
+metric-type (1|2) metric <0-16777214> route-map WORD
+ - OSPF Command: no redistribute (kernel|connected|static|rip|bgp)
+
+ - OSPF Command: default-information originate
+ - OSPF Command: default-information originate metric <0-16777214>
+ - OSPF Command: default-information originate metric <0-16777214>
+metric-type (1|2)
+ - OSPF Command: default-information originate metric <0-16777214>
+metric-type (1|2) route-map WORD
+ - OSPF Command: default-information originate always
+ - OSPF Command: default-information originate always metric
+<0-16777214>
+ - OSPF Command: default-information originate always metric
+<0-16777214> metric-type (1|2)
+ - OSPF Command: default-information originate always metric
+<0-16777214> metric-type (1|2) route-map WORD
+ - OSPF Command: no default-information originate
+
+ - OSPF Command: distribute-list NAME out
+(kernel|connected|static|rip|ospf
+ - OSPF Command: no distribute-list NAME out
+(kernel|connected|static|rip|ospf
+
+ - OSPF Command: default-metric <0-16777214>
+ - OSPF Command: no default-metric
+
+ - OSPF Command: distance <1-255>
+ - OSPF Command: no distance <1-255>
+
+ - OSPF Command: distance ospf (intra-area|inter-area|external) <1-255>
+ - OSPF Command: no distance ospf
+
+ - Command: router zebra
+ - Command: no router zebra
+
+
+File: zebra.info,  Node: Showing OSPF information,  Next: Debugging OSPF,  Prev: Redistribute routes to OSPF,  Up: OSPFv2
+
+Showing OSPF information
+========================
+
+ - Command: show ip ospf
+
+ - Command: show ip ospf interface [INTERFACE]
+
+ - Command: show ip ospf neighbor
+ - Command: show ip ospf neighbor INTERFACE
+ - Command: show ip ospf neighbor detail
+ - Command: show ip ospf neighbor INTERFACE detail
+
+ - Command: show ip ospf database
+
+ - Command: show ip ospf database
+(asbr-summary|external|network|router|summary)
+ - Command: show ip ospf database
+(asbr-summary|external|network|router|summary) LINK-STATE-ID
+ - Command: show ip ospf database
+(asbr-summary|external|network|router|summary) LINK-STATE-ID adv-router
+ADV-ROUTER
+ - Command: show ip ospf database
+(asbr-summary|external|network|router|summary) adv-router ADV-ROUTER
+ - Command: show ip ospf database
+(asbr-summary|external|network|router|summary) LINK-STATE-ID
+self-originate
+ - Command: show ip ospf database
+(asbr-summary|external|network|router|summary) self-originate
+
+ - Command: show ip ospf database max-age
+
+ - Command: show ip ospf database self-originate
+
+ - Command: show ip ospf refresher
+
+ - Command: show ip ospf route
+
+
+File: zebra.info,  Node: Debugging OSPF,  Prev: Showing OSPF information,  Up: OSPFv2
+
+Debugging OSPF
+==============
+
+ - Command: debug ospf packet
+(hello|dd|ls-request|ls-update|ls-ack|all) (send|recv) [detail]
+ - Command: no debug ospf packet
+(hello|dd|ls-request|ls-update|ls-ack|all) (send|recv) [detail]
+
+ - Command: debug ospf ism
+ - Command: debug ospf ism (status|events|timers)
+ - Command: no debug ospf ism
+ - Command: no debug ospf ism (status|events|timers)
+
+ - Command: debug ospf nsm
+ - Command: debug ospf nsm (status|events|timers)
+ - Command: no debug ospf nsm
+ - Command: no debug ospf nsm (status|events|timers)
+
+ - Command: debug ospf lsa
+ - Command: debug ospf lsa (generate|flooding|refresh)
+ - Command: no debug ospf lsa
+ - Command: no debug ospf lsa (generate|flooding|refresh)
+
+ - Command: debug ospf zebra
+ - Command: debug ospf zebra (interface|redistribute)
+ - Command: no debug ospf zebra
+ - Command: no debug ospf zebra (interface|redistribute)
+
+ - Command: show debugging ospf
+
+
+File: zebra.info,  Node: OSPFv3,  Next: BGP,  Prev: OSPFv2,  Up: Top
+
+OSPFv3
+******
+
+   `ospf6d' is a daemon support OSPF version 3 for IPv6 network.  OSPF
+for IPv6 is described in RFC2740.
+
+* Menu:
+
+* OSPF6 router::
+* OSPF6 area::
+* OSPF6 interface::
+* Redistribute routes to OSPF6::
+* Showing OSPF6 information::
+
+
+File: zebra.info,  Node: OSPF6 router,  Next: OSPF6 area,  Prev: OSPFv3,  Up: OSPFv3
+
+OSPF6 router
+============
+
+ - Command: router ospf6
+
+ - OSPF6 Command: router-id A.B.C.D
+     Set router's Router-ID.
+
+ - OSPF6 Command: interface IFNAME area AREA
+     Bind interface to specified area, and start sending OSPF packets.
+     AREA can be specified as 0.
+
+
+File: zebra.info,  Node: OSPF6 area,  Next: OSPF6 interface,  Prev: OSPF6 router,  Up: OSPFv3
+
+OSPF6 area
+==========
+
+   Area support for OSPFv3 is not yet implemented.
+
+
+File: zebra.info,  Node: OSPF6 interface,  Next: Redistribute routes to OSPF6,  Prev: OSPF6 area,  Up: OSPFv3
+
+OSPF6 interface
+===============
+
+ - Interface Command: ipv6 ospf6 cost COST
+     Sets interface's output cost.  Default value is 1.
+
+ - Interface Command: ipv6 ospf6 hello-interval HELLOINTERVAL
+     Sets interface's Hello Interval.  Default 40
+
+ - Interface Command: ipv6 ospf6 dead-interval DEADINTERVAL
+     Sets interface's Router Dead Interval.  Default value is 40.
+
+ - Interface Command: ipv6 ospf6 retransmit-interval RETRANSMITINTERVAL
+     Sets interface's Rxmt Interval.  Default value is 5.
+
+ - Interface Command: ipv6 ospf6 priority PRIORITY
+     Sets interface's Router Priority.  Default value is 1.
+
+ - Interface Command: ipv6 ospf6 transmit-delay TRANSMITDELAY
+     Sets interface's Inf-Trans-Delay.  Default value is 1.
+
+
+File: zebra.info,  Node: Redistribute routes to OSPF6,  Next: Showing OSPF6 information,  Prev: OSPF6 interface,  Up: OSPFv3
+
+Redistribute routes to OSPF6
+============================
+
+ - OSPF6 Command: redistribute static
+ - OSPF6 Command: redistribute connected
+ - OSPF6 Command: redistribute ripng
+
+
+File: zebra.info,  Node: Showing OSPF6 information,  Prev: Redistribute routes to OSPF6,  Up: OSPFv3
+
+Showing OSPF6 information
+=========================
+
+ - Command: show ipv6 ospf6 [INSTANCE_ID]
+     INSTANCE_ID is an optional OSPF instance ID. To see router ID and
+     OSPF instance ID, simply type "show ipv6 ospf6 <cr>".
+
+ - Command: show ipv6 ospf6 database
+     This command shows LSA database summary.  You can specify the type
+     of LSA.
+
+ - Command: show ipv6 ospf6 interface
+     To see OSPF interface configuration like costs.
+
+ - Command: show ipv6 ospf6 neighbor
+     Shows state and chosen (Backup) DR of neighbor.
+
+ - Command: show ipv6 ospf6 request-list A.B.C.D
+     Shows requestlist of neighbor.
+
+ - Command: show ipv6 route ospf6
+     This command shows internal routing table.
+
+
+File: zebra.info,  Node: BGP,  Next: vtysh,  Prev: OSPFv3,  Up: Top
+
+BGP
+***
+
+   `bgpd' is a Border Gateway Protocol 4 (BGP-4) protocol daemon.
+BGP-4 is described in RFC1771.  bgpd also supports Multiprotocol
+Extension for BGP-4 (sometimes known as BGP-4+ or MBGP) which is
+described in RFC2283.
+
+   BGP-4 is one of the Exterior Gateway Protocols and is used for
+Inter-Domain routing.
+
+* Menu:
+
+* Configuring bgpd::
+* BGP router::
+* BGP peer::
+* BGP network::
+* Redistribute to BGP::
+* Peer configuration::
+* Peer filtering::
+* BGP Communities Attribute::
+* BGP terminal mode commands::
+* BGP Log Format::
+* Multiple Protocol Extension for BGP::
+* Route Reflector::
+* Route Server::
+* How to set up a 6-Bone connection::
+* Dump BGP packets and table::
+
+
+File: zebra.info,  Node: Configuring bgpd,  Next: BGP router,  Prev: BGP,  Up: BGP
+
+Configuring bgpd
+================
+
+   Default configuration file of `bgpd' is `bgpd.conf'.  `bgpd'
+searches the current directory first then /usr/local/etc/bgpd.conf.
+All of bgpd's command must be configured in `bgpd.conf'.
+
+   `bgpd' specific invocation options are described below.  Common
+options may also be specified (*note Common Invocation Options::).
+
+`-p PORT'
+`--bgp_port=PORT'
+     Set the bgp protocol's port number.
+
+`-r'
+`--retain'
+     When program terminates, retain BGP routes added by zebra.
+
+
+File: zebra.info,  Node: BGP router,  Next: BGP peer,  Prev: Configuring bgpd,  Up: BGP
+
+BGP router
+==========
+
+   First of all you must configure BGP router with `router bgp'
+command.  To configure BGP router, you need AS number.  AS number is an
+identification of autonomous system.  BGP protocol uses the AS number
+for detecting whether the BGP connection is internal one or external
+one.
+
+   AS number is a digit between 1 and 65535.  The use of AS numbers is
+described in RFC1930.  AS numbers 64512 through 65535 are defined as
+private AS numbers.  Private AS numbers must not to be advertised in the
+global Internet.
+
+ - Command: router bgp AS-NUMBER
+     Enable a BGP protocol process with the specified AS-NUMBER.  After
+     this statement you can input any `BGP Commands'.  You can not
+     create different BGP process under different AS-NUMBER without
+     specifying `multiple-instance' (*note Multiple instance::).
+
+ - Command: no router bgp AS-NUMBER
+     Destroy a BGP protocol process with the specified AS-NUMBER.
+
+ - BGP Command: bgp router-id ROUTER-ID
+     This command specifies the router-ID.  If `bgpd' connects to
+     `zebra' it gets interface and address information.  In that case
+     default router ID value is selected as the largest IP Address of
+     the interfaces.  When `router zebra' is not enabled `bgpd' can't
+     get interface information so `router-id' is set to 0.0.0.0.  So
+     please set router-id by hand.
+
+
+File: zebra.info,  Node: BGP peer,  Next: BGP network,  Prev: BGP router,  Up: BGP
+
+BGP peer
+========
+
+ - BGP Command: neighbor PEER remote-as AS-NUMBER
+     Creates a new neighbor whose remote-as is AS-NUMBER.  PEER can be
+     an IPv4 address or an IPv6 address.
+          router bgp 1
+           neighbor 10.0.0.1 remote-as 2
+     In this case my router, in AS-1, is trying to peer with AS-2
+     at 10.0.0.1.
+
+     This command must be the first command used when configuring a
+     neighbor.  If the remote-as is not specified, `bgpd' will complain
+     like this:
+          can't find neighbor 10.0.0.1
+
+
+File: zebra.info,  Node: BGP network,  Next: Redistribute to BGP,  Prev: BGP peer,  Up: BGP
+
+BGP network
+===========
+
+ - BGP Command: network NETWORK
+     This command adds the announcement network.
+          router bgp 1
+           network 10.0.0.0/8
+     This configuration example says that network 10.0.0.0/8 will
+     be announced to all neighbors.  Some vendors' routers don't
+     advertise routes if they aren't present in their IGP routing
+     tables; `bgp' doesn't care about IGP routes when announcing its
+     routes.
+
+ - BGP Command: no network NETWORK
+
+ - BGP Command: aggregate-address NETWORK
+     This command specifies an aggregate address.
+
+ - BGP Command: no aggregate-address NETWORK
+
+
+File: zebra.info,  Node: Redistribute to BGP,  Next: Peer configuration,  Prev: BGP network,  Up: BGP
+
+Redistribute to BGP
+===================
+
+ - BGP Command: redistribute kernel
+     Redistribute kernel route to BGP process.
+
+ - BGP Command: redistribute static
+     Redistribute static route to BGP process.
+
+ - BGP Command: redistribute connected
+     Redistribute connected route to BGP process.
+
+ - BGP Command: redistribute rip
+     Redistribute RIP route to BGP process.
+
+ - BGP Command: redistribute ospf
+     Redistribute OSPF route to BGP process.
+
+
+File: zebra.info,  Node: Peer configuration,  Next: Peer filtering,  Prev: Redistribute to BGP,  Up: BGP
+
+Peer configuration
+==================
+
+   In a `router bgp' clause there are neighbor specific configurations
+required.
+
+ - BGP Command: neighbor PEER shutdown
+ - BGP Command: no neighbor PEER shutdown
+     Shutdown the peer.  We can delete the neighbor's configuration by
+     `no neighbor PEER remote-as AS-NUMBER' but all configuration of
+     the neighbor will be deleted.  When you want to preserve the
+     configuration, but want to drop the BGP peer, use this syntax.
+
+ - BGP Command: neighbor PEER ebgp-multihop
+ - BGP Command: no neighbor PEER ebgp-multihop
+
+ - BGP Command: neighbor PEER description ...
+ - BGP Command: no neighbor PEER description ...
+     Set description of the peer.
+
+ - BGP Command: neighbor PEER version VERSION
+     Set up the neighbor's BGP version.  VERSION can be 4, 4+ or 4-.
+     BGP version 4 is the default value used for BGP peering.  BGP
+     version 4+ means that the neighbor supports Multiprotocol
+     Extensions for BGP-4.  BGP version 4- is similar but the neighbor
+     speaks the old Internet-Draft revision 00's Multiprotocol
+     Extensions for BGP-4.  Some routing software is still using this
+     version.
+
+ - BGP Command: neighbor PEER interface IFNAME
+ - BGP Command: no neighbor PEER interface IFNAME
+     When you connect to a BGP peer over an IPv6 link-local address,
+     you have to specify the IFNAME of the interface used for the
+     connection.
+
+ - BGP Command: neighbor PEER next-hop-self
+ - BGP Command: no neighbor PEER next-hop-self
+     This command specifies an announced route's nexthop as being
+     equivalent to the address of the bgp router.
+
+ - BGP Command: neighbor PEER update-source
+ - BGP Command: no neighbor PEER update-source
+
+ - BGP Command: neighbor PEER default-originate
+ - BGP Command: no neighbor PEER default-originate
+     `bgpd''s default is to not announce the default route (0.0.0.0/0)
+     even it is in routing table.  When you want to announce default
+     routes to the peer, use this command.
+
+ - BGP Command: neighbor PEER port PORT
+ - BGP Command: neighbor PEER port PORT
+
+ - BGP Command: neighbor PEER send-community
+ - BGP Command: neighbor PEER send-community
+
+ - BGP Command: neighbor PEER weight WEIGHT
+ - BGP Command: no neighbor PEER weight WEIGHT
+     This command specifies a default WEIGHT value for the neighbor's
+     routes.
+
+ - BGP Command: neighbor PEER maximum-prefix NUMBER
+ - BGP Command: no neighbor PEER maximum-prefix NUMBER
+
+
+File: zebra.info,  Node: Peer filtering,  Next: BGP Communities Attribute,  Prev: Peer configuration,  Up: BGP
+
+Peer filtering
+==============
+
+ - BGP Command: neighbor PEER distribute-list NAME [in|out]
+     This command specifies a distribute-list for the peer.  DIRECT is
+     `in' or `out'.
+
+ - BGP command: neighbor PEER prefix-list NAME [in|out]
+
+ - BGP command: neighbor PEER filter-list NAME [in|out]
+
+ - BGP Command: neighbor PEER route-map NAME [in|out]
+     Apply a route-map on the neighbor.  DIRECT must be `in' or `out'.
+
+
+File: zebra.info,  Node: BGP Communities Attribute,  Next: BGP terminal mode commands,  Prev: Peer filtering,  Up: BGP
+
+BGP Communities Attribute
+=========================
+
+   BGP communities attribute is widely used for implementing policy
+routing.  Network operators can manipulate BGP communities attribute
+based on their network policy.  BGP communities attribute is defined in
+RFC1997 - `BGP Communities Attribute' and RFC1998 - `An Application of
+the BGP Community Attribute in Multi-home Routing'.  It is an optional
+trasitive attribute, therefore local policy can travel through
+different autonomous system.
+
+   Communities attribute includes communities values.  Each communities
+value is 32 bit long.  The following format is used to define
+communities value.
+
+`AS:VAL'
+     This format represents 32 bit communities value.  `AS' is high
+     order 16 bit in digit format.  `VAL' is low order 16 bit in digit
+     format.  This format is useful to define AS oriented policy value.
+     For example, `7675:80' can be used when AS 7675 wants to pass
+     local policy value 80 to neighboring peer.
+
+`internet'
+     `internet' represents well-known communities value 0.
+
+`no-export'
+     `no-export' represents well-known communities value `NO_EXPORT'
+     (0xFFFFFF01).  All routes carry this value must not be advertised
+     to outside a BGP confederation boundary.  If neighboring BGP peer
+     is part of BGP confederation, the peer is considered as inside a
+     BGP confederation boundary, so the route will be announced to the
+     peer.
+
+`no-advertise'
+     `no-advertise' represents well-known communities value
+     `NO_ADVERTISE'
+     (0xFFFFFF02).  All routes carry this value must not be advertise
+     to other BGP peers.
+
+`local-AS'
+     `local-AS' represents well-known communities value
+     `NO_EXPORT_SUBCONFED' (0xFFFFFF03).  All routes carry this value
+     must not be advertised to external BGP peers.  Even if the
+     neighboring router is part of confederation, it is considered as
+     external BGP peer, so the route will not be announced to the peer.
+
+   When BGP communities attribute is received, duplicated communities
+value in the communities attribute is ignored and each communities
+values are sorted in numerical order.
+
+* Menu:
+
+* BGP Community Lists::
+* Numbered BGP Community Lists::
+* Display BGP Table by Community::
+* Using BGP Community in Route Map::
+* Example of Community Lists::
+
+
+File: zebra.info,  Node: BGP Community Lists,  Next: Numbered BGP Community Lists,  Prev: BGP Communities Attribute,  Up: BGP Communities Attribute
+
+BGP Community Lists
+-------------------
+
+   Community-list is a user defined BGP communites attribute list.
+Community-list can be used for manipulating BGP communities attribute
+in BGP updates.
+
+   There are two types of community-list.  One is standard
+community-list and another is expanded community-list.  Standard
+community-list defines communities attribute without regular
+expression.  Expanded community-list defines communities attribute with
+regular expression.  Standard community-list is compiled into binary
+format when user define it.  Standard community-list will be directly
+compared to BGP communities attribute in BGP updates.  The comparison
+is faster than expanded community-list.
+
+ - Command: ip community-list standard NAME {permit|deny} COMMUNITY
+     This command defines a new standard community-list.  Standard
+     community-list is compiled into community structure.  We can define
+     multiple community-list using same name.  In that case match will
+     happen defined order.  Once the community-list matches to
+     communities attribute it return permit or deny depends on the
+     community-list definition.  When there is no matched entry, deny
+     will be returned.
+
+ - Command: ip community-list expanded NAME {permit|deny} LINE
+     This command defines a new expanded community-list.  LINE is a
+     string expression of communities attribute.  LINE can include
+     regular expression to match communities attribute in BGP updates.
+
+ - Command: no ip community-list NAME
+ - Command: no ip community-list standard NAME
+ - Command: no ip community-list expanded NAME
+     These commands delete community lists specified by NAME.  All of
+     community lists shares a single name space.  So community lists
+     can be removed simpley specifying community lists name.
+
+ - Command: show ip community-list
+ - Command: show ip community-list NAME
+     This command display current community-list information.  When
+     NAME is specified the community list's information is shown.
+
+          # show ip community-list
+          Named Community standard list CLIST
+              permit 7675:80 7675:100 no-export
+          Named Community expanded list EXPAND
+              permit :
+          
+          # show ip community-list CLIST
+          Named Community standard list CLIST
+              permit 7675:80 7675:100 no-export
+
+
+File: zebra.info,  Node: Numbered BGP Community Lists,  Next: Display BGP Table by Community,  Prev: BGP Community Lists,  Up: BGP Communities Attribute
+
+Numbered BGP Community Lists
+----------------------------
+
+   When number is used for BGP community lists name, it is numbered BGP
+community lists.  There are special number ranges.  Community list
+number in the range from 1 and 99 is standard community-list.
+Community list number in the range from 100 to 199 is treated as
+expanded community-list.  On the other hand normal community lists is
+sometimes called as named community lists.
+
+ - Command: ip community-list <1-99> {permit|deny} COMMUNITY
+     This command defines a new community-list.  <1-99> is standard
+     community-list number.  Community-list name within this range
+     defines standard community list.
+
+ - Command: ip community-list <100-199> {permit|deny} COMMUNITY
+     This command defines a new community-list.  <100-199> is expanded
+     community-list number.  Community-list name within this range
+     defines expanded community list.
+
+ - Command: ip community-list NAME {permit|deny} COMMUNITY
+     When community list type is not specifed, the community list type
+     is automatically detected.  If COMMUNITY can be compiled into
+     communities attribute, the community list is defined as a standard
+     community list.  Otherwise it is defined as an expanded community
+     list.  This feature is left for backward compability.  Use of this
+     feature is not recommended.
+
+
+File: zebra.info,  Node: Display BGP Table by Community,  Next: Using BGP Community in Route Map,  Prev: Numbered BGP Community Lists,  Up: BGP Communities Attribute
+
+Display BGP Table by Community
+------------------------------
+
+ - Command: show ip bgp community COMMUNITY
+ - Command: show ip bgp community COMMUNITY exact-match
+     AS:VAL no-export no-advertise local-AS
+
+
+ - Command: show ip bgp community-list WORD
+ - Command: show ip bgp community-list WORD exact-match
+
+
+File: zebra.info,  Node: Using BGP Community in Route Map,  Next: Example of Community Lists,  Prev: Display BGP Table by Community,  Up: BGP Communities Attribute
+
+Using BGP Community in Route Map
+--------------------------------
+
+   In Route Map *Note Route Map::, we can use community for matching and
+setting.
+
+ - Route Map: match community WORD
+ - Route Map: match community WORD exact-match
+     WORD is Community List name.  When `exact-match' keyword is
+     spcified.
+
+ - Route Map: set community none
+ - Route Map: set community COMMUNITY
+ - Route Map: set community COMMUNITY additive
+
+ - Route Map: set comm-list WORD delete
+
+
+File: zebra.info,  Node: Example of Community Lists,  Prev: Using BGP Community in Route Map,  Up: BGP Communities Attribute
+
+Example of Community Lists
+--------------------------
+
+     ip community-list standard CLIST permit 7675:80 7675:90
+     ip community-list standard CLIST deny 7675:100
+
+   The following exmaple matches communities attribute which upper 16
+bit has value 7675.
+
+     ip community-list expanded CLIST permit 7675:.*
+
+
+File: zebra.info,  Node: BGP terminal mode commands,  Next: BGP Log Format,  Prev: BGP Communities Attribute,  Up: BGP
+
+BGP terminal mode commands
+==========================
+
+ - Command: show ip bgp [NETWORK]
+     Lists all BGPd routes.
+
+ - Command: show ip bgp regexp AS-REGEXP
+
+ - Command: show ip bgp summary
+
+ - Command: show ip bgp neighbor [PEER]
+
+ - Command: clear ip bgp PEER
+     Clear peers which have addresses of X.X.X.X
+
+ - Command: clear ip bgp PEER soft in
+     Clear peer using soft reconfiguration.
+
+ - Command: show debug
+
+ - Command: debug event
+
+ - Command: debug update
+
+ - Command: debug keepalive
+
+ - Command: no debug event
+
+ - Command: no debug update
+
+ - Command: no debug keepalive
+
+
+File: zebra.info,  Node: BGP Log Format,  Next: Multiple Protocol Extension for BGP,  Prev: BGP terminal mode commands,  Up: BGP
+
+BGP Log Format
+==============
+
+   BGPd outputs logging information to a terminal or to the specified
+file.  It includes routing updates and peer status change information.
+It also includes date, time, packet type, the peer's IP address, and
+other routing information.
+
+     1999/03/29 17:42:18 Update:[202.216.226.1] 130.58.0.0/16 med: 0 lpref: 0 nexthop: 202.216.226.1 aspath: 4691 3561 5119 3576 3782 i
+
+
+File: zebra.info,  Node: Multiple Protocol Extension for BGP,  Next: Route Reflector,  Prev: BGP Log Format,  Up: BGP
+
+Multiprotocol Extension for BGP
+===============================
+
+   When adding IPv6 routing information exchange feature to BGP.  There
+were some proposals.  IETF IDR working group finally take a proposal
+called Multiprotocol Extension for BGP.  The specification is described
+in RFC2283.  The protocol does not define new protocols.  It defines
+new attributes to existing BGP.  When it is used exchanging IPv6
+routing information it is called BGP-4+.  When it is used for
+exchanging multicast routing information it is called MBGP.
+
+   `bgpd' supports Multiprotocol Extension for BGP.  So if remote peer
+supports the protocol, `bgpd' can exchange IPv6 and/or multicast routing
+information.
+
+   Traditional BGP does not have the feature to detect remote peer's
+capability whether it can handle other than IPv4 unicast routes.  This
+is a big problem using Multiprotocol Extension for BGP to operational
+network.  `draft-ietf-idr-bgp4-cap-neg-04.txt' is proposing a feature
+called Capability Negotiation.  `bgpd' use this Capability Negotiation
+to detect remote peer's capabilities.  If the peer is only configured
+as IPv4 unicast neighbor, `bgpd' does not send these Capability
+Negotiation packets.
+
+   By default, Zebra will bring up peering with minimal common
+capability for the both sides.  For example, local router has unicast
+and multicast capabilitie and remote router has unicast capability.  In
+this case, the local router will establish the connection with unicast
+only capability.  When there are no common capabilities, Zebra sends
+Unsupported Capability error and then resets the connection.
+
+   If you want to completely match capabilities with remote peer.
+Please use `strict-capability-match' command.
+
+ - BGP Command: neighbor PEER strict-capability-match
+ - BGP Command: no neighbor PEER strict-capability-match
+     Strictly compares remote capabilities and local capabilities.  If
+     capabilities are different, send Unsupported Capability error then
+     reset connection.
+
+   You may want to disable sending Capability Negotiation OPEN message
+optional parameter to the peer when remote peer does not implement
+Capability Negotiation.  Please use `dont-capability-negotiate' command
+to disable the feature.
+
+ - BGP Command: neighbor PEER dont-capability-negotiate
+ - BGP Command: no neighbor PEER dont-capability-negotiate
+     Suppress sending Capability Negotiation as OPEN message optional
+     parameter to the peer.  This command only affects the peer is
+     configured other than IPv4 unicast configuration.
+
+   When remote peer does not have capability negotiation feature, remote
+peer will not send any capabilities at all.  In that case, bgp
+configures the peer with configured capabilities.
+
+   You may prefer locally configured capabilities more than the
+negotiated capabilities even though remote peer sends capabilities.  If
+the peer is configured by `override-capability', `bgpd' ignores received
+capabilities then override negotiated capabilities with configured
+values.
+
+ - BGP Command: neighbor PEER override-capability
+ - BGP Command: no neighbor PEER override-capability
+     Override the result of Capability Negotiation with local
+     configuration.  Ignore remote peer's capability value.
+
+
+File: zebra.info,  Node: Route Reflector,  Next: Route Server,  Prev: Multiple Protocol Extension for BGP,  Up: BGP
+
+Route Reflector
+===============
+
+ - BGP Command: bgp cluster-id A.B.C.D
+
+ - BGP Command: neighbor PEER route-reflector-client
+ - BGP Command: no neighbor PEER route-reflector-client
+
+
+File: zebra.info,  Node: Route Server,  Next: How to set up a 6-Bone connection,  Prev: Route Reflector,  Up: BGP
+
+Route Server
+============
+
+   At an Internet Exchange point, many ISPs are connected to each other
+by external BGP peering.  Normally these external BGP connection are
+done by `full mesh' method.  As with internal BGP full mesh formation,
+this method has a scaling problem.
+
+   This scaling problem is well known.  Route Server is a method to
+resolve the problem.  Each ISP's BGP router only peers to Route Server.
+Route Server serves as BGP information exchange to other BGP routers.
+By applying this method, numbers of BGP connections is reduced from
+O(n*(n-1)/2) to O(n).
+
+   Unlike normal BGP router, Route Server must have several routing
+tables for managing different routing policies for each BGP speaker.
+We call the routing tables as different `view's.  `bgpd' can work as
+normal BGP router or Route Server or both at the same time.
+
+* Menu:
+
+* Multiple instance::
+* BGP instance and view::
+* Routing policy::
+* Viewing the view::
+
+
+File: zebra.info,  Node: Multiple instance,  Next: BGP instance and view,  Prev: Route Server,  Up: Route Server
+
+Multiple instance
+-----------------
+
+   To enable multiple view function of `bgpd', you must turn on
+multiple instance feature beforehand.
+
+ - Command: bgp multiple-instance
+     Enable BGP multiple instance feature.  After this feature is
+     enabled, you can make multiple BGP instances or multiple BGP views.
+
+ - Command: no bgp multiple-instance
+     Disable BGP multiple instance feature.  You can not disable this
+     feature when BGP multiple instances or views exist.
+
+   When you want to make configuration more Cisco like one,
+
+ - Command: bgp config-type cisco
+     Cisco compatible BGP configuration output.
+
+   When bgp config-type cisco is specified,
+
+   "no synchronization" is displayed.  "no auto-summary" is desplayed.
+
+   "network" and "aggregate-address" argument is displayed as "A.B.C.D
+M.M.M.M"
+
+   Zebra: network 10.0.0.0/8 Cisco: network 10.0.0.0
+
+   Zebra: aggregate-address 192.168.0.0/24 Cisco: aggregate-address
+192.168.0.0 255.255.255.0
+
+   Community attribute handling is also different.  If there is no
+configuration is specified community attribute and extended community
+attribute are sent to neighbor.  When user manually disable the feature
+community attribute is not sent to the neighbor.  In case of "bgp
+config-type cisco" is specified, community attribute is not sent to the
+neighbor by default.  To send community attribute user has to specify
+"neighbor A.B.C.D send-community" command.
+
+   !  router bgp 1  neighbor 10.0.0.1 remote-as 1  no neighbor 10.0.0.1
+send-community !
+
+   !  router bgp 1  neighbor 10.0.0.1 remote-as 1  neighbor 10.0.0.1
+send-community !
+
+ - Command: bgp config-type zebra
+     Zebra style BGP configuration.  This is default.
+
+
+File: zebra.info,  Node: BGP instance and view,  Next: Routing policy,  Prev: Multiple instance,  Up: Route Server
+
+BGP instance and view
+---------------------
+
+   BGP instance is a normal BGP process.  The result of route selection
+goes to the kernel routing table.  You can setup different AS at the
+same time when BGP multiple instance feature is enabled.
+
+ - Command: router bgp AS-NUMBER
+     Make a new BGP instance.  You can use arbitrary word for the NAME.
+
+     bgp multiple-instance
+     !
+     router bgp 1
+      neighbor 10.0.0.1 remote-as 2
+      neighbor 10.0.0.2 remote-as 3
+     !
+     router bgp 2
+      neighbor 10.0.0.3 remote-as 4
+      neighbor 10.0.0.4 remote-as 5
+
+   BGP view is almost same as normal BGP process. The result of route
+selection does not go to the kernel routing table.  BGP view is only
+for exchanging BGP routing information.
+
+ - Command: router bgp AS-NUMBER view NAME
+     Make a new BGP view.  You can use arbitrary word for the NAME.
+     This view's route selection result does not go to the kernel
+     routing table.
+
+   With this command, you can setup Route Server like below.
+
+     bgp multiple-instance
+     !
+     router bgp 1 view 1
+      neighbor 10.0.0.1 remote-as 2
+      neighbor 10.0.0.2 remote-as 3
+     !
+     router bgp 2 view 2
+      neighbor 10.0.0.3 remote-as 4
+      neighbor 10.0.0.4 remote-as 5
+
+
+File: zebra.info,  Node: Routing policy,  Next: Viewing the view,  Prev: BGP instance and view,  Up: Route Server
+
+Routing policy
+--------------
+
+   You can set different routing policy for a peer.  For example, you
+can set different filter for a peer.
+
+     bgp multiple-instance
+     !
+     router bgp 1 view 1
+      neighbor 10.0.0.1 remote-as 2
+      neighbor 10.0.0.1 distribute-list 1 in
+     !
+     router bgp 1 view 2
+      neighbor 10.0.0.1 remote-as 2
+      neighbor 10.0.0.1 distribute-list 2 in
+
+   This means BGP update from a peer 10.0.0.1 goes to both BGP view 1
+and view 2.  When the update is inserted into view 1, distribute-list 1
+is applied.  On the other hand, when the update is inserted into view 2,
+distribute-list 2 is applied.
+
+
+File: zebra.info,  Node: Viewing the view,  Prev: Routing policy,  Up: Route Server
+
+Viewing the view
+----------------
+
+   To display routing table of BGP view, you must specify view name.
+
+ - Command: show ip bgp view NAME
+     Display routing table of BGP view NAME.
+
+
+File: zebra.info,  Node: How to set up a 6-Bone connection,  Next: Dump BGP packets and table,  Prev: Route Server,  Up: BGP
+
+How to set up a 6-Bone connection
+=================================
+
+     zebra configuration
+     ===================
+     !
+     ! Actually there is no need to configure zebra
+     !
+     
+     bgpd configuration
+     ==================
+     !
+     ! This means that routes go through zebra and into the kernel.
+     !
+     router zebra
+     !
+     ! MP-BGP configuration
+     !
+     router bgp 7675
+      bgp router-id 10.0.0.1
+      neighbor 3ffe:1cfa:0:2:2a0:c9ff:fe9e:f56 remote-as AS-NUMBER
+     !
+      address-family ipv6
+      network 3ffe:506::/32
+      neighbor 3ffe:1cfa:0:2:2a0:c9ff:fe9e:f56 activate
+      neighbor 3ffe:1cfa:0:2:2a0:c9ff:fe9e:f56 route-map set-nexthop out
+      neighbor 3ffe:1cfa:0:2:2c0:4fff:fe68:a231 remote-as AS-NUMBER
+      neighbor 3ffe:1cfa:0:2:2c0:4fff:fe68:a231 route-map set-nexthop out
+      exit-address-family
+     !
+     ipv6 access-list all permit any
+     !
+     ! Set output nexthop address.
+     !
+     route-map set-nexthop permit 10
+      match ipv6 address all
+      set ipv6 nexthop global 3ffe:1cfa:0:2:2c0:4fff:fe68:a225
+      set ipv6 nexthop local fe80::2c0:4fff:fe68:a225
+     !
+     ! logfile FILENAME is obsolete.  Please use log file FILENAME
+     !
+     log file bgpd.log
+     !
+
+
+File: zebra.info,  Node: Dump BGP packets and table,  Prev: How to set up a 6-Bone connection,  Up: BGP
+
+Dump BGP packets and table
+==========================
+
+ - Command: dump bgp all PATH
+ - Command: dump bgp all PATH INTERVAL
+     Dump all BGP packet and events to PATH file.
+
+ - Command: dump bgp updates PATH
+ - Command: dump bgp updates PATH INTERVAL
+     Dump BGP updates to PATH file.
+
+ - Command: dump bgp routes PATH
+ - Command: dump bgp routes PATH
+     Dump whole BGP routing table to PATH.  This is heavy process.
+

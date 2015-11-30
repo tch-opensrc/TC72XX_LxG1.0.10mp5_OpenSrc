@@ -1,0 +1,50 @@
+.TH UDHCPC 8 2001-09-26 GNU/Linux "GNU/Linux Administrator's Manual"
+.SH NAME
+udhcpc \- very small DHCP client
+.SH SYNOPSIS
+.B udhcpc
+.RI [ OPTION ]...
+.SH DESCRIPTION
+The uDHCP client negotiates a lease with the DHCP server and
+executes a script when it is obtained or lost.
+.SH OPTIONS
+.TP
+.BI \-c\  CLIENTID ,\ \-\-clientid= CLIENTID
+Send the client identifier
+.IR CLIENTID .
+.TP
+.BR -f ,\  \-\-foreground
+Do not fork after obtaining a lease.
+.TP
+.BI \-H\  HOSTNAME ,\ \-\-hostname= HOSTNAME
+Send the client hostname
+.IR HOSTNAME .
+.TP
+.BI \-i\  INTERFACE ,\ \-\-interface= INTERFACE
+Configure
+.IR INTERFACE .
+.TP
+.BR -n ,\  \-\-now
+Exit with failure if a lease cannot be obtained.
+.TP
+.BI \-p\  FILE ,\ \-\-pidfile= FILE
+Write the process ID of the daemon to
+.IR FILE .
+.TP
+.BR -q ,\  \-\-quit
+Exit after obtaining a lease.
+.TP
+.BI \-r\  ADDRESS ,\ \-\-request= ADDRESS
+Request IP address
+.IR ADDRESS .
+.TP
+.BI \-s\  FILE ,\ \-\-script= FILE
+Use script
+.IR FILE .
+.TP
+.BR -v ,\  \-\-version
+Display version.
+.SH FILES
+.TP
+.I /usr/share/udhcpc/default.script
+Script run when leases are obtained or lost.

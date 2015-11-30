@@ -1,0 +1,15 @@
+#!/bin/sh
+if [ $# -ne 2 ] || [ ! -e /dev/$2 ]; then
+    exit 1
+fi
+BAUD=$1
+DEVICE=$2
+mkdir -p /var/run
+PIDF=/var/run/getty-$DEVICE.pid
+RETVAL=0
+while [ $RETVAL -eq 0 ] || [ $RETVAL -eq 1 ]; do
+   start-stop-daemon -S -q -m -p $PIDF -x getty -- -n -w $BAUD $DEVICE
+   RETVAL=$?
+   logger -t getty-start retval=$RETVAL 
+done&
+

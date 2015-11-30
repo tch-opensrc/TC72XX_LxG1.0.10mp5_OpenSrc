@@ -1,0 +1,9 @@
+The files in this dir are:
+
+	udhcpd.conf: A sample udhpcd configuration file.
+	
+	sample.script
+	sample.deconfig
+	sample.bound
+	sample.renew	: sample scripts for the udhcpc client.
+	
