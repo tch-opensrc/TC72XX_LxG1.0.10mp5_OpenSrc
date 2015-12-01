@@ -15,9 +15,10 @@
 # Top-level Makefile for all commengine xDSL platforms
 
 LIBOPT=n
+ifeq ($(strip $(TOOLCHAIN_TOP)),)
 export PATH=/opt/toolchains/uclibc-crosstools-gcc-4.2.3-4/usr/bin:$PATH
 export TOOLCHAIN_TOP=/opt/toolchains/uclibc-crosstools-gcc-4.2.3-4
-
+endif
 ###########################################
 #
 # This is the most important target: make all
