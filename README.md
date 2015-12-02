@@ -3,7 +3,7 @@ LxG1.0.10mp5 open source release note for TC7210/TC7230 models
 
 How to bulid all the linux partition images
 
-* Checkout source code by GitHub :
+* Checkout source code from GitHub :
 	* $git clone https://github.com/mailenh/TC72XX_LxG1.0.10mp5_OpenSrc.git
 	* $cd TC72XX_LxG1.0.10mp5_OpenSrc
 
@@ -11,7 +11,8 @@ How to bulid all the linux partition images
 	* $sudo tar zxvf toolchains.tar.gz -C /opt
 
 * Build linux source code for kernel, rootfs and apps partition images :
-	* $make PROFILE=3384
+	* $./build_gpl.sh clean
+	* $./build_gpl.sh
 	
 * All the partition images will be created on targets/3384 :
 	* kernel and rootfs for nor - bcm3384_kernel_rootfs_squash
