@@ -8,4 +8,6 @@ if [ -z "$TOOLCHAIN_BIN_PATH" ]; then
 	export PATH=$TOOLCHAIN_BIN:$PATH
 fi
 
-make PROFILE=3384 $1
+PROFILE=3384
+echo "make PROFILE=$PROFILE $1"
+make PROFILE=$PROFILE $1

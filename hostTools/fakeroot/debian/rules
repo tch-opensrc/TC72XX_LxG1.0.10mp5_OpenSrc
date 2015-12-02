@@ -1,0 +1,239 @@
+#!/usr/bin/make -f
+
+DEB_BUILD_GNU_TYPE = $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
+DEB_HOST_GNU_TYPE = $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
+ifneq ($(DEB_BUILD_GNU_TYPE),$(DEB_HOST_GNU_TYPE))
+CONFARGS = --host=$(DEB_HOST_GNU_TYPE)
+endif
+
+CFLAGS = -W -Wall -g
+INSTALL = install
+INSTALL_FILE    = $(INSTALL) -p    -o root -g root  -m  644
+INSTALL_PROGRAM = $(INSTALL) -p    -o root -g root  -m  755
+INSTALL_SCRIPT  = $(INSTALL) -p    -o root -g root  -m  755
+INSTALL_DIR     = $(INSTALL) -p -d -o root -g root  -m  755
+
+ifneq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
+CFLAGS += -O0
+else
+CFLAGS += -O2
+endif
+
+ifeq (,$(findstring nostrip,$(DEB_BUILD_OPTIONS)))
+INSTALL_PROGRAM += -s
+endif
+
+ifeq (x86_64-linux-gnu,$(DEB_HOST_GNU_TYPE))
+BIARCH_LIB_DIR=emul/ia32-linux/usr/lib
+else
+ifneq (,$(findstring $(DEB_HOST_GNU_TYPE), ppc64-linux-gnu x86_64-kfreebsd-gnu))
+BIARCH_LIB_DIR=usr/lib32
+else
+BIARCH_LIB_DIR=usr/lib64
+endif
+endif
+
+fakeroot_version := $(shell dpkg-parsechangelog | sed -n '/^Version: \(.*\)$$/ {s//\1/;p}')
+
+build: build-stamp
+build-stamp:
+	$(checkdir)
+
+	mkdir obj-sysv obj-tcp
+	cd obj-sysv && CFLAGS="$(CFLAGS)" ../configure --prefix=/usr --mandir=/usr/share/man --libdir=/usr/lib/libfakeroot --program-suffix=-sysv $(CONFARGS)
+
+	cd obj-tcp && CFLAGS="$(CFLAGS)" ../configure --prefix=/usr --mandir=/usr/share/man --libdir=/usr/lib/libfakeroot --with-ipc=tcp --program-suffix=-tcp $(CONFARGS)
+
+	cd obj-sysv && $(MAKE)
+	cd obj-tcp && $(MAKE)
+
+ifeq ($(DEB_BUILD_GNU_TYPE),$(DEB_HOST_GNU_TYPE))
+ifeq (,$(findstring nocheck,$(DEB_BUILD_OPTIONS)))
+	cd obj-sysv && $(MAKE) check
+	cd obj-tcp && $(MAKE) check
+endif
+endif
+
+	touch build-stamp
+
+clean: checkroot
+	$(checkdir)
+	rm -rf obj-sysv obj64-sysv obj-tcp obj64-tcp
+	rm -f build-stamp build-biarch-stamp
+#	 Add here commands to clean up after the build process.
+	-cd obj-sysv && $(MAKE) distclean
+	-cd obj-tcp && $(MAKE) distclean
+ifneq (,$(findstring $(DEB_HOST_GNU_TYPE), sparc-linux-gnu s390-linux-gnu x86_64-linux-gnu i486-linux-gnu powerpc-linux-gnu ppc64-linux-gnu x86_64-kfreebsd-gnu))
+	-cd obj64-sysv && $(MAKE) distclean
+	-cd obj64-tcp && $(MAKE) distclean
+endif
+	rm -rf .deps
+	rm -f debian/substvars debian/files
+	rm -rf debian/tmp obj obj64 autom4te.cache
+	find . -type f -a \( -name \#\*\# -o -name .\*\~ -o -name \*\~ -o -name DEADJOE -o -name \*.orig -o -name \*.rej -o -name \*.bak -o -name .\*.orig -o -name .\*.rej -o -name .SUMS -o -name TAGS -o -name core -o \( -path \*/.deps/\* -a -name \*.P \) \) -exec rm -f {} \;
+
+# Build architecture-independent files here.
+binary-indep: build
+# We have nothing to do by default.
+
+# Build architecture-dependent files here.
+binary-arch: build checkroot
+	$(checkdir)
+
+	cd obj-tcp && $(MAKE) DESTDIR="$(CURDIR)/debian/tmp" install
+	mv debian/tmp/usr/lib/libfakeroot/libfakeroot-0.so debian/tmp/usr/lib/libfakeroot/libfakeroot-tcp.so
+	rm debian/tmp/usr/lib/libfakeroot/libfakeroot.so
+
+	cd obj-sysv && $(MAKE) DESTDIR="$(CURDIR)/debian/tmp" install
+
+	mv debian/tmp/usr/lib/libfakeroot/libfakeroot-0.so debian/tmp/usr/lib/libfakeroot/libfakeroot-sysv.so
+	rm debian/tmp/usr/lib/libfakeroot/libfakeroot.so
+
+	$(INSTALL_DIR) debian/tmp/DEBIAN debian/tmp/usr/bin/
+#	$(INSTALL_SCRIPT) scripts/fakeroot debian/tmp/usr/bin/
+	$(INSTALL_DIR) debian/tmp/usr/share/doc/fakeroot \
+		           debian/tmp/usr/lib/libfakeroot
+	$(INSTALL_FILE) README doc/README.saving DEBUG debian/tmp/usr/share/doc/fakeroot/
+	( echo "fakeroot was written originally by"; \
+	  echo "joost witteveen"                   ; \
+	  echo "------------------------------------------------"; \
+	  cat COPYING) > debian/tmp/usr/share/doc/fakeroot/copyright
+#	cd obj-sysv && ./libtool --finish $(CURDIR)/debian/tmp/usr/lib/fakeroot
+	rm -f debian/tmp/usr/lib/libfakeroot/libfakeroot.*a*
+	rm -f debian/tmp/usr/bin/simple
+ifneq (,$(findstring $(DEB_HOST_GNU_TYPE), sparc-linux-gnu s390-linux-gnu x86_64-linux-gnu i486-linux-gnu powerpc-linux-gnu ppc64-linux-gnui x86_64-kfreebsd-gnu))
+	$(MAKE) -f debian/rules binary-biarch
+endif
+	$(INSTALL_FILE) debian/copyright debian/tmp/usr/share/doc/fakeroot/copyright
+	$(INSTALL_FILE) debian/changelog debian/tmp/usr/share/doc/fakeroot/changelog
+	gzip -9f debian/tmp/usr/share/man/man1/faked-sysv.1 \
+		 debian/tmp/usr/share/man/man1/fakeroot-sysv.1 \
+		 debian/tmp/usr/share/man/man1/faked-tcp.1 \
+		 debian/tmp/usr/share/man/man1/fakeroot-tcp.1 \
+		 debian/tmp/usr/share/man/es/man1/faked-sysv.1 \
+		 debian/tmp/usr/share/man/es/man1/fakeroot-sysv.1 \
+		 debian/tmp/usr/share/man/es/man1/faked-tcp.1 \
+		 debian/tmp/usr/share/man/es/man1/fakeroot-tcp.1 \
+		 debian/tmp/usr/share/man/fr/man1/faked-sysv.1 \
+		 debian/tmp/usr/share/man/fr/man1/fakeroot-sysv.1 \
+		 debian/tmp/usr/share/man/fr/man1/faked-tcp.1 \
+		 debian/tmp/usr/share/man/fr/man1/fakeroot-tcp.1 \
+		 debian/tmp/usr/share/man/nl/man1/faked-sysv.1 \
+		 debian/tmp/usr/share/man/nl/man1/fakeroot-sysv.1 \
+		 debian/tmp/usr/share/man/nl/man1/faked-tcp.1 \
+		 debian/tmp/usr/share/man/nl/man1/fakeroot-tcp.1 \
+		 debian/tmp/usr/share/man/sv/man1/faked-sysv.1 \
+		 debian/tmp/usr/share/man/sv/man1/fakeroot-sysv.1 \
+		 debian/tmp/usr/share/man/sv/man1/faked-tcp.1 \
+		 debian/tmp/usr/share/man/sv/man1/fakeroot-tcp.1 \
+		 debian/tmp/usr/share/doc/fakeroot/changelog
+ifeq (,$(findstring nostrip,$(DEB_BUILD_OPTIONS)))
+	strip --remove-section=.comment --remove-section=.note --strip-unneeded debian/tmp/usr/lib/libfakeroot/libfakeroot-sysv.so
+	strip --remove-section=.comment --remove-section=.note --strip-unneeded debian/tmp/usr/lib/libfakeroot/libfakeroot-tcp.so
+	strip --remove-section=.comment --remove-section=.note debian/tmp/usr/bin/faked-sysv
+	strip --remove-section=.comment --remove-section=.note debian/tmp/usr/bin/faked-tcp
+#	strip --strip-debug debian/tmp/usr/lib/libfakeroot.a
+endif
+	$(INSTALL_SCRIPT) debian/fakeroot.postrm debian/tmp/DEBIAN/postrm
+	$(INSTALL_SCRIPT) debian/fakeroot.prerm debian/tmp/DEBIAN/prerm
+ifneq ($(DEB_HOST_GNU_SYSTEM),gnu)
+	sed 's/@FAKEROOT_SYSV_ALTPRIO@/50/;s/@FAKEROOT_TCP_ALTPRIO@/30/;' \
+		debian/fakeroot.postinst.in > debian/fakeroot.postinst
+else
+	sed 's/@FAKEROOT_SYSV_ALTPRIO@/30/;s/@FAKEROOT_TCP_ALTPRIO@/50/;' \
+		debian/fakeroot.postinst.in > debian/fakeroot.postinst
+endif
+	$(INSTALL_SCRIPT) debian/fakeroot.postinst debian/tmp/DEBIAN/postinst
+	rm -f debian/fakeroot.postinst
+	# We can just use the deps for faked.
+	dpkg-shlibdeps -Tdebian/substvars \
+		debian/tmp/usr/bin/faked-sysv \
+		debian/tmp/usr/bin/faked-tcp
+	dpkg-gencontrol -ldebian/changelog -isp -Tdebian/substvars -Pdebian/tmp
+	chmod 644 debian/tmp/DEBIAN/control
+	chown root:root debian/tmp/DEBIAN/control
+	cd debian/tmp && find * -type f ! -regex '^DEBIAN/.*' -print0 | xargs -r0 md5sum > DEBIAN/md5sums
+	dpkg-deb --build debian/tmp ..
+
+binary-biarch:
+	$(checkdir)
+	mkdir obj64-sysv obj64-tcp
+
+ifneq (,$(findstring $(DEB_HOST_GNU_TYPE),sparc-linux-gnu))
+	cd obj64-sysv && CC="gcc -m64" ../configure --prefix=/usr --mandir=/usr/share/man --build=sparc-linux --host=sparc64-linux-gnu --program-suffix=-sysv $(CONFARGS)
+	cd obj64-tcp && CC="gcc -m64" ../configure --prefix=/usr --mandir=/usr/share/man --build=sparc-linux --host=sparc64-linux-gnu --with-ipc=tcp --program-suffix=-tcp $(CONFARGS)
+endif
+ifneq (,$(findstring $(DEB_HOST_GNU_TYPE),s390-linux-gnu))
+	cd obj64-sysv && CC="gcc -m64" ../configure --prefix=/usr --mandir=/usr/share/man --build=s390-linux --host=s390x-linux-gnu --program-suffix=-sysv $(CONFARGS)
+	cd obj64-tcp && CC="gcc -m64" ../configure --prefix=/usr --mandir=/usr/share/man --build=s390-linux --host=s390x-linux-gnu --with-ipc=tcp --program-suffix=-tcp $(CONFARGS)
+endif
+ifneq (,$(findstring $(DEB_HOST_GNU_TYPE),x86_64-linux-gnu))
+	cd obj64-sysv && CC="gcc -m32" ../configure --prefix=/usr --mandir=/usr/share/man --build=x86_64-linux --host=i486-linux-gnu --program-suffix=-sysv $(CONFARGS)
+	cd obj64-tcp && CC="gcc -m32" ../configure --prefix=/usr --mandir=/usr/share/man --build=x86_64-linux --host=i486-linux-gnu --with-ipc=tcp --program-suffix=-tcp $(CONFARGS)
+endif
+ifneq (,$(findstring $(DEB_HOST_GNU_TYPE),i486-linux-gnu))
+	cd obj64-sysv && CC="gcc -m64" ../configure --prefix=/usr --mandir=/usr/share/man --build=i486-linux --host=x86_64-linux-gnu --program-suffix=-sysv $(CONFARGS)
+	cd obj64-tcp && CC="gcc -m64" ../configure --prefix=/usr --mandir=/usr/share/man --build=i486-linux --host=x86_64-linux-gnu --with-ipc=tcp --program-suffix=-tcp $(CONFARGS)
+endif
+ifneq (,$(findstring $(DEB_HOST_GNU_TYPE),powerpc-linux-gnu))
+	cd obj64-sysv && CC="gcc -m64" ../configure --prefix=/usr --mandir=/usr/share/man --build=powerpc-linux --host=ppc64-linux-gnu --program-suffix=-sysv $(CONFARGS)
+	cd obj64-tcp && CC="gcc -m64" ../configure --prefix=/usr --mandir=/usr/share/man --build=powerpc-linux --host=ppc64-linux-gnu --with-ipc=tcp --program-suffix=-tcp $(CONFARGS)
+endif
+ifneq (,$(findstring $(DEB_HOST_GNU_TYPE),ppc64-linux-gnu))
+	cd obj64-sysv && CC="gcc -m32" ../configure --prefix=/usr --mandir=/usr/share/man --build=ppc64-linux --host=powerpc-linux-gnu --program-suffix=-sysv $(CONFARGS)
+	cd obj64-tcp && CC="gcc -m32" ../configure --prefix=/usr --mandir=/usr/share/man --build=ppc64-linux --host=powerpc-linux-gnu --with-ipc=tcp --program-suffix=-tcp $(CONFARGS)
+endif
+ifneq (,$(findstring $(DEB_HOST_GNU_TYPE),x86_64-kfreebsd-gnu))
+	cd obj64-sysv && CC="gcc -m32" ../configure --prefix=/usr --mandir=/usr/share/man --build=x86_64-kfreebsd --host=i486-kfreebsd-gnu --program-suffix=-sysv $(CONFARGS)
+	cd obj64-tcp && CC="gcc -m32" ../configure --prefix=/usr --mandir=/usr/share/man --build=x86_64-kfreebsd --host=i486-kfreebsd-gnu --with-ipc=tcp --program-suffix=-tcp $(CONFARGS)
+endif
+
+	cd obj64-tcp && $(MAKE) libfakeroot.la
+	$(INSTALL_DIR) debian/tmp/$(BIARCH_LIB_DIR)/libfakeroot
+	cd obj64-tcp && $(SHELL) ./libtool --mode=install install libfakeroot.la \
+		$(CURDIR)/debian/tmp/$(BIARCH_LIB_DIR)/libfakeroot/libfakeroot.la
+	rm -f debian/tmp/$(BIARCH_LIB_DIR)/libfakeroot/libfakeroot.*a*
+	mv debian/tmp/$(BIARCH_LIB_DIR)/libfakeroot/libfakeroot-0.so debian/tmp/$(BIARCH_LIB_DIR)/libfakeroot/libfakeroot-tcp.so
+#	mv debian/tmp/$(BIARCH_LIB_DIR)/libfakeroot.so.0.0.1 debian/tmp/$(BIARCH_LIB_DIR)/libfakeroot-tcp.so.0.0.1
+#	mv debian/tmp/$(BIARCH_LIB_DIR)/libfakeroot.so.0 debian/tmp/$(BIARCH_LIB_DIR)/libfakeroot-tcp.so.0
+
+	cd obj64-sysv && $(MAKE) libfakeroot.la
+	$(INSTALL_DIR) debian/tmp/$(BIARCH_LIB_DIR)/libfakeroot
+	cd obj64-sysv && $(SHELL) ./libtool --mode=install install libfakeroot.la \
+		$(CURDIR)/debian/tmp/$(BIARCH_LIB_DIR)/libfakeroot/libfakeroot.la
+#	cd obj64-sysv && ./libtool --finish debian/fakeroot-sparc/$(BIARCH_LIB_DIR)/fakeroot
+	rm -f debian/tmp/$(BIARCH_LIB_DIR)/libfakeroot/libfakeroot.*a*
+	mv debian/tmp/$(BIARCH_LIB_DIR)/libfakeroot/libfakeroot-0.so debian/tmp/$(BIARCH_LIB_DIR)/libfakeroot/libfakeroot-sysv.so
+
+	rm debian/tmp/$(BIARCH_LIB_DIR)/libfakeroot/libfakeroot.so
+#	rm debian/tmp/$(BIARCH_LIB_DIR)/libfakeroot.so
+ifeq (,$(findstring nostrip,$(DEB_BUILD_OPTIONS)))
+	strip --remove-section=.comment --remove-section=.note --strip-unneeded debian/tmp/$(BIARCH_LIB_DIR)/libfakeroot/libfakeroot-sysv.so
+	strip --remove-section=.comment --remove-section=.note --strip-unneeded debian/tmp/$(BIARCH_LIB_DIR)/libfakeroot/libfakeroot-tcp.so
+endif
+
+source diff:
+	@echo >&2 'source and diff are obsolete - use dpkg-source -b'; false
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary checkroot prebuild
+
+prebuild:
+	printf "define(FAKEROOT_VERSION, %s)\n" $(fakeroot_version) >acinclude.m4
+
+	autoreconf -fi
+
+	cd doc && po4a -k 0 --rm-backups --variable "srcdir=$(CURDIR)/doc/" po4a/po4a.cfg
+
+#	./configure
+#	$(MAKE) dist
+#	mv fakeroot-$(fakeroot_version).tar.gz ../fakeroot_$(fakeroot_version).tar.gz
+#	$(MAKE) distclean
+
+define checkdir
+	test -f debian/rules
+endef
+
+checkroot:
+	$(checkdir)
+	test root = "`whoami`"

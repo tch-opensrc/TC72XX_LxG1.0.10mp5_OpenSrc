@@ -1,0 +1,33 @@
+Fakeroot::Stat version 1.8.8
+============================
+
+This provides fakestat() and fakelstat() functions which will communicate
+with a faked and return what the faked stat or lstat information is for
+the file.
+
+INSTALLATION
+
+To install this module type the following:
+
+   perl Makefile.PL
+   make
+   make test
+   make install
+
+DEPENDENCIES
+
+This module requires these other modules and libraries:
+
+  fakeroot version 1.8.8 or later
+
+COPYRIGHT AND LICENCE
+
+Copyright (C) 2002-2007 THUS plc.
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+AUTHORS
+
+Members of the SCM Team at THUS plc (scm@thus.net)
+

@@ -1,0 +1,288 @@
+/* config.h.in.  Generated from configure.ac by autoheader.  */
+
+/* for packed */
+#undef FAKEROOT_ATTR
+
+/* store path in the database instead of inode and device */
+#undef FAKEROOT_DB_PATH
+
+/* use TCP instead of SysV IPC */
+#undef FAKEROOT_FAKENET
+
+/* Define to 1 if the compiler understands __builtin_expect. */
+#undef HAVE_BUILTIN_EXPECT
+
+/* Define to 1 if you have the declaration of `setenv', and to 0 if you don't.
+   */
+#undef HAVE_DECL_SETENV
+
+/* Define to 1 if you have the declaration of `unsetenv', and to 0 if you
+   don't. */
+#undef HAVE_DECL_UNSETENV
+
+/* Define to 1 if you have the <dirent.h> header file, and it defines `DIR'.
+   */
+#undef HAVE_DIRENT_H
+
+/* Define to 1 if you have the <dlfcn.h> header file. */
+#undef HAVE_DLFCN_H
+
+/* Define to 1 if you have the <endian.h> header file. */
+#undef HAVE_ENDIAN_H
+
+/* Define to 1 if you have the `fchmodat' function. */
+#undef HAVE_FCHMODAT
+
+/* Define to 1 if you have the `fchownat' function. */
+#undef HAVE_FCHOWNAT
+
+/* Define to 1 if you have the <fcntl.h> header file. */
+#undef HAVE_FCNTL_H
+
+/* Define to 1 if you have the <features.h> header file. */
+#undef HAVE_FEATURES_H
+
+/* Define to 1 if you have the `fstatat' function. */
+#undef HAVE_FSTATAT
+
+/* Define to 1 if you have the `getresgid' function. */
+#undef HAVE_GETRESGID
+
+/* Define to 1 if you have the `getresuid' function. */
+#undef HAVE_GETRESUID
+
+/* Define to 1 if you have the <grp.h> header file. */
+#undef HAVE_GRP_H
+
+/* Define to 1 if you have the <inttypes.h> header file. */
+#undef HAVE_INTTYPES_H
+
+/* Define to 1 if you have the `dl' library (-ldl). */
+#undef HAVE_LIBDL
+
+/* Define to 1 if you have the `pthread' library (-lpthread). */
+#undef HAVE_LIBPTHREAD
+
+/* Define to 1 if you have the `socket' library (-lsocket). */
+#undef HAVE_LIBSOCKET
+
+/* Define to 1 if you have the <memory.h> header file. */
+#undef HAVE_MEMORY_H
+
+/* Define to 1 if you have the `mkdirat' function. */
+#undef HAVE_MKDIRAT
+
+/* Define to 1 if you have the `mknodat' function. */
+#undef HAVE_MKNODAT
+
+/* Define to 1 if you have the <ndir.h> header file, and it defines `DIR'. */
+#undef HAVE_NDIR_H
+
+/* Define to 1 if you have the `openat' function. */
+#undef HAVE_OPENAT
+
+/* Define to 1 if you have the <pthread.h> header file. */
+#undef HAVE_PTHREAD_H
+
+/* Define to 1 if you have the `renameat' function. */
+#undef HAVE_RENAMEAT
+
+/* have the semun union */
+#undef HAVE_SEMUN_DEF
+
+/* Define to 1 if you have the `setenv' function. */
+#undef HAVE_SETENV
+
+/* Define to 1 if you have the `setfsgid' function. */
+#undef HAVE_SETFSGID
+
+/* Define to 1 if you have the `setfsuid' function. */
+#undef HAVE_SETFSUID
+
+/* Define to 1 if you have the `setresgid' function. */
+#undef HAVE_SETRESGID
+
+/* Define to 1 if you have the `setresuid' function. */
+#undef HAVE_SETRESUID
+
+/* Define to 1 if you have the <stdint.h> header file. */
+#undef HAVE_STDINT_H
+
+/* Define to 1 if you have the <stdlib.h> header file. */
+#undef HAVE_STDLIB_H
+
+/* Define to 1 if you have the `strdup' function. */
+#undef HAVE_STRDUP
+
+/* Define to 1 if you have the <strings.h> header file. */
+#undef HAVE_STRINGS_H
+
+/* Define to 1 if you have the <string.h> header file. */
+#undef HAVE_STRING_H
+
+/* Define to 1 if you have the `strstr' function. */
+#undef HAVE_STRSTR
+
+/* Define to 1 if you have the <sys/acl.h> header file. */
+#undef HAVE_SYS_ACL_H
+
+/* Define to 1 if you have the <sys/dir.h> header file, and it defines `DIR'.
+   */
+#undef HAVE_SYS_DIR_H
+
+/* Define to 1 if you have the <sys/feature_tests.h> header file. */
+#undef HAVE_SYS_FEATURE_TESTS_H
+
+/* Define to 1 if you have the <sys/ndir.h> header file, and it defines `DIR'.
+   */
+#undef HAVE_SYS_NDIR_H
+
+/* Define to 1 if you have the <sys/socket.h> header file. */
+#undef HAVE_SYS_SOCKET_H
+
+/* Define to 1 if you have the <sys/stat.h> header file. */
+#undef HAVE_SYS_STAT_H
+
+/* Define to 1 if you have the <sys/sysmacros.h> header file. */
+#undef HAVE_SYS_SYSMACROS_H
+
+/* Define to 1 if you have the <sys/types.h> header file. */
+#undef HAVE_SYS_TYPES_H
+
+/* Define to 1 if you have the <unistd.h> header file. */
+#undef HAVE_UNISTD_H
+
+/* Define to 1 if you have the `unlinkat' function. */
+#undef HAVE_UNLINKAT
+
+/* second argument of initgroups */
+#undef INITGROUPS_SECOND_ARG
+
+/* path to libc shared object */
+#undef LIBCPATH
+
+/* Define to the sub-directory in which libtool stores uninstalled libraries.
+   */
+#undef LT_OBJDIR
+
+/* Name of package */
+#undef PACKAGE
+
+/* Define to the address where bug reports for this package should be sent. */
+#undef PACKAGE_BUGREPORT
+
+/* Define to the full name of this package. */
+#undef PACKAGE_NAME
+
+/* Define to the full name and version of this package. */
+#undef PACKAGE_STRING
+
+/* Define to the one symbol short name of this package. */
+#undef PACKAGE_TARNAME
+
+/* Define to the version of this package. */
+#undef PACKAGE_VERSION
+
+/* type of readlink bufsize */
+#undef READLINK_BUFSIZE_TYPE
+
+/* type of readlink buf */
+#undef READLINK_BUF_TYPE
+
+/* type of readlink return value */
+#undef READLINK_RETVAL_TYPE
+
+/* type of setgroups size */
+#undef SETGROUPS_SIZE_TYPE
+
+/* argument of setregid */
+#undef SETREGID_ARG
+
+/* argument of setreuid */
+#undef SETREUID_ARG
+
+/* second argument of stat */
+#undef STAT_SECOND_ARG
+
+/* Define to 1 if you have the ANSI C header files. */
+#undef STDC_HEADERS
+
+/* stat-struct conversion hackery */
+#undef STUPID_ALPHA_HACK
+
+/* Version number of package */
+#undef VERSION
+
+/* Stuff.  */
+#define WRAP_STAT  __astat 
+#define WRAP_STAT_QUOTE  __astat 
+#define TMP_STAT  __astat 
+#define NEXT_STAT_NOARG  next___astat
+
+#define WRAP_LSTAT_QUOTE  __astat 
+#define WRAP_LSTAT  __astat 
+#define TMP_LSTAT  __astat 
+#define NEXT_LSTAT_NOARG  next___astat 
+
+#define WRAP_FSTAT_QUOTE  __astat 
+#define WRAP_FSTAT  __astat 
+#define TMP_FSTAT  __astat 
+#define NEXT_FSTAT_NOARG  next___astat 
+
+#define WRAP_FSTATAT_QUOTE  __astatat 
+#define WRAP_FSTATAT  __astatat 
+#define TMP_FSTATAT  __astatat 
+#define NEXT_FSTATAT_NOARG  next___astatat 
+
+#define WRAP_STAT64_QUOTE  __astat64 
+#define WRAP_STAT64  __astat64 
+#define TMP_STAT64  __astat64 
+#define NEXT_STAT64_NOARG  next___astat64 
+
+#define WRAP_LSTAT64_QUOTE  __astat64 
+#define WRAP_LSTAT64  __astat64 
+#define TMP_LSTAT64  __astat64 
+#define NEXT_LSTAT64_NOARG  next___astat64 
+
+#define WRAP_FSTAT64_QUOTE  __astat64
+#define WRAP_FSTAT64  __astat64
+#define TMP_FSTAT64  __astat64
+#define NEXT_FSTAT64_NOARG  next___astat64 
+
+#define WRAP_FSTATAT64_QUOTE  __astatat64
+#define WRAP_FSTATAT64  __astatat64
+#define TMP_FSTATAT64  __astatat64
+#define NEXT_FSTATAT64_NOARG  next___astatat64 
+
+#define WRAP_MKNOD_QUOTE  __amknod 
+#define WRAP_MKNOD  __amknod 
+#define TMP_MKNOD  __amknod 
+#define NEXT_MKNOD_NOARG  next___amknod 
+
+#define WRAP_MKNODAT_QUOTE  __amknodat 
+#define WRAP_MKNODAT  __amknodat 
+#define TMP_MKNODAT  __amknodat 
+#define NEXT_MKNODAT_NOARG  next___amknodat 
+
+
+/* fifth argument of __xmknodat */
+#undef XMKNODAT_FIFTH_ARG
+
+/* fourth argument of __xmknod */
+#undef XMKNOD_FRTH_ARG
+
+/* Define to empty if `const' does not conform to ANSI C. */
+#undef const
+
+/* Define to `int' if <sys/types.h> does not define. */
+#undef mode_t
+
+/* Define to `long' if <sys/types.h> does not define. */
+#undef off_t
+
+/* Define to `unsigned' if <sys/types.h> does not define. */
+#undef size_t
+
+#if ! HAVE_BUILTIN_EXPECT
+#define __builtin_expect(x, expected_value) (x)
+#endif

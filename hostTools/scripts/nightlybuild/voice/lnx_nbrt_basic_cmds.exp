@@ -1,0 +1,115 @@
+#
+# Login to a Linux box
+#
+proc lnxLogin {ip username pass} {
+
+   send_user "Login to Linux   : $ip\n"
+   set timeout 20
+   spawn ssh -l $username $ip
+   global ssh_spawn_id
+   set ssh_spawn_id $spawn_id
+   expect {
+      "password:" {}
+      "refused" {
+         send_user "\n Cannot connect to host $ip !!! \n"
+         exit 1
+      }
+      timeout {
+         send_user "\n Timeout while connecting to host $ip !!!  \n"
+         exit 1
+      }
+   }
+   
+   send "$pass\r"
+   expect {
+      "$username@*\\$" {}
+      "denied" {
+         send_user "\n Password not correct for user $username !!! \n"
+         exit 1
+      }
+      timeout {
+         send_user "\n Timeout while waiting for user passord !!! \n"
+         exit 1
+      }
+   }
+
+   send_user "Login Complete\n"
+   return 0
+}
+
+
+#
+# Switch to superuser (user already logged in)
+#
+proc lnxSu {pass} {
+   global ssh_spawn_id
+   set spawn_id $ssh_spawn_id
+   send_user "\n Switching to superuser\n"
+
+   send "su\r"
+   expect {
+      "Password:" {}
+      timeout {
+         send_user "\n Timeout. Couldn't switch to superuser !!!  \n"
+         exit 1
+      }
+   }
+
+   send "$pass\r"
+   expect {
+      "root@" {}
+      "incorrect password" {
+         send_user "\n Invalid password for superuser !!! \n"
+         exit 1
+      }
+      timeout {
+         send_user "\n Timeout. Couldn't switch to superuser !!! \n"
+         exit 1
+      }
+   }
+
+   send_user "\n Switched to superuser\n"  
+}
+
+
+#
+# Generic Linux command
+#    parameter 1: the actual command
+#    parameter 2: timeout value for the command (default = 10 sec)
+#
+proc lnxCmd {cmd timeoutvalue} {
+  global ssh_spawn_id
+  set spawn_id $ssh_spawn_id
+  set timeout $timeoutvalue
+
+  send_user "\n \n $cmd \n"
+
+  send "$cmd \r"
+  send "if \[ $? -ne 0 \]; then echo 'cmd''failure'; else echo 'cmd''success';fi \r"
+
+  if {$timeout < 20} {
+     set timeout 20
+  }
+  send_user "Timeout for the command \"$cmd\" set to $timeout sec\n"
+  expect {
+     "cmdfailure" {
+              send_user "\n The Linux command \"$cmd\" has failed !!!\n"
+     }
+     "cmdsuccess" {
+              send_user "\n The Linux command \"$cmd\" has succeeded \n"
+     }
+     timeout {
+        send_user "\n Timeout for Linux command \"$cmd\"  \n"
+        exit 1
+     }
+  }
+}
+
+
+proc lnxTest {params} {
+  set test [lindex $params 1]
+  puts $test
+  puts [exec ls]
+}
+
+#lnxTest "ab cd de ef"

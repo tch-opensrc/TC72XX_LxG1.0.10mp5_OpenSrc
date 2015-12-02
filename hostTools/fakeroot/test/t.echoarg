@@ -1,0 +1,4 @@
+#!/bin/sh
+
+../scripts/fakeroot${tcp} -f ../faked${tcp} -l ../.libs/${libfakeroot} -- \
+ ${posixshell} -c 'RET="$('"${srcdir}"'/echo_arg 3 a b c d e)"; echo RET=$RET; test "$RET" = "b"'

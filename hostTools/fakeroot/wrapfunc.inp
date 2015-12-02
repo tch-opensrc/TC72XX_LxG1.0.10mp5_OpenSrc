@@ -1,0 +1,129 @@
+/* This file lists the functions that are wrapped by libtricks, their     */ 
+/* arguments, and the way to call them. This is then used to generate	  */ 
+/* the wrapper functions declarations in wrapped.h, the wrapper functions */ 
+/* definitions wrapdef.h (actually, only assignments of the function 	  */ 
+/* variables), the structure of wrapped functions in wrapstruct.h,	  */ 
+/* and the temporary definitions (that hold until one of them is executed)*/ 
+/* in wraptmpf.h                                                          */ 
+/**/                                                                      */
+/**/									  */
+/* each line of this file lists 4 fields, seperated by a ";".		  */
+/* The first field is the name of the wrapped function, then it's return  */
+/* value. After that come the function arguments with types, and the last */
+/* field contains the function arguments without types.                   */
+/**/
+open;int;(const char *pathname, int flags, int mode);(pathname, flags, mode)
+fopen;FILE *;(const char *pathname, const char *mode);(pathname, mode)
+freopen;FILE *;(const char *pathname, const char *mode, FILE *stream);(pathname, mode, stream)
+
+/* __*xstat are used on glibc systems instead of just *xstat. */
+/**/
+
+WRAP_LSTAT;int;LSTAT_ARG(int ver, const char *file_name, struct stat *buf);LSTAT_ARG(ver, file_name, buf);LSTAT
+WRAP_STAT;int;STAT_ARG(int ver, const char *file_name, struct stat *buf);STAT_ARG(ver, file_name, buf);STAT
+WRAP_FSTAT;int;FSTAT_ARG(int ver, int fd, struct stat *buf);FSTAT_ARG(ver, fd, buf);FSTAT
+#ifdef HAVE_FSTATAT
+WRAP_FSTATAT;int;FSTATAT_ARG(int ver, int dir_fd, const char *path, struct stat *buf, int flags);FSTATAT_ARG(ver, dir_fd, path, buf, flags);FSTATAT
+#endif /* HAVE_FSTATAT */
+
+#ifdef STAT64_SUPPORT
+WRAP_LSTAT64;int;LSTAT64_ARG(int ver, const char *file_name, struct stat64 *buf);LSTAT64_ARG(ver, file_name, buf);LSTAT64
+WRAP_STAT64;int;STAT64_ARG(int ver, const char *file_name, struct stat64 *buf);STAT64_ARG(ver, file_name, buf);STAT64
+WRAP_FSTAT64;int;FSTAT64_ARG(int ver, int fd, struct stat64 *buf);FSTAT64_ARG(ver, fd, buf);FSTAT64
+#ifdef HAVE_FSTATAT
+WRAP_FSTATAT64;int;FSTATAT64_ARG(int ver, int dir_fd, const char *path, struct stat64 *buf, int flags);FSTATAT64_ARG(ver, dir_fd, path, buf, flags);FSTATAT64
+#endif /* HAVE_FSTATAT */
+#endif /* STAT64_SUPPORT */
+
+WRAP_MKNOD;int;MKNOD_ARG(int ver, const char *pathname, mode_t mode, dev_t XMKNOD_FRTH_ARG dev);MKNOD_ARG(ver, pathname, mode, dev);MKNOD
+
+#ifdef HAVE_FSTATAT
+#ifdef HAVE_MKNODAT
+WRAP_MKNODAT;int;MKNODAT_ARG(int ver, int dir_fd, const char *pathname, mode_t mode, dev_t dev);MKNODAT_ARG(ver, dir_fd, pathname, mode, dev);MKNODAT
+#endif /* HAVE_MKNODAT */
+#endif /* HAVE_FSTATAT */
+
+/*opendir;DIR *;(const char *name);(name)*/
+/*closedir;int;(DIR *dir);(dir)*/
+/*readdir;struct dirent *;(DIR *dir);(dir)*/
+/*readlink;READLINK_RETVAL_TYPE;(const char *path, READLINK_BUF_TYPE *buf, READLINK_BUFSIZE_TYPE bufsize);(path, buf, bufsize)*/
+/*telldir;off_t;(DIR *dir);(dir)*/
+
+chown;int;(const char *path, uid_t owner, gid_t group);(path, owner, group)
+lchown;int;(const char *path, uid_t owner, gid_t group);(path, owner, group)
+fchown;int;(int fd, uid_t owner, gid_t group);(fd, owner, group)
+chmod;int;(const char *path, mode_t mode);(path, mode)
+fchmod;int;(int fd, mode_t mode);(fd, mode)
+mkdir;int;(const char *path, mode_t mode);(path, mode)
+unlink;int;(const char *pathname);(pathname)
+rmdir;int;(const char *pathname);(pathname)
+remove;int;(const char *pathname);(pathname)
+rename;int;(const char *oldpath, const char *newpath);(oldpath, newpath)
+/*__execve;int;(const char *path, char *const argv[], char *const envp[]);(path,argv,envp)*/
+/*execve;int;(const char *path, char *const argv[], char *const envp[]);(path,argv,envp)*/
+
+#ifdef FAKEROOT_FAKENET
+fork;pid_t;(void);()
+vfork;pid_t;(void);()
+close;int;(int fd);(fd)
+dup2;int;(int oldfd, int newfd);(oldfd, newfd)
+#endif /* FAKEROOT_FAKENET */
+
+/* for fakeroot */
+
+getuid;uid_t;(void);()
+getgid;gid_t;(void);()
+geteuid;uid_t;(void);()
+getegid;gid_t;(void);()
+setuid;int;(uid_t id);(id)
+setgid;int;(gid_t id);(id)
+seteuid;int;(uid_t id);(id)
+setegid;int;(gid_t id);(id)
+setreuid;int;(SETREUID_ARG ruid, SETREUID_ARG euid);(ruid, euid)
+setregid;int;(SETREGID_ARG rgid, SETREGID_ARG egid);(rgid, egid)
+#ifdef HAVE_GETRESUID
+getresuid;int;(uid_t *ruid, uid_t *euid, uid_t *suid);(ruid, euid, suid)
+#endif /* HAVE_GETRESUID */
+#ifdef HAVE_GETRESGID
+getresgid;int;(gid_t *rgid, gid_t *egid, gid_t *sgid);(rgid, egid, sgid)
+#endif /* HAVE_GETRESGID */
+#ifdef HAVE_SETRESUID
+setresuid;int;(uid_t ruid, uid_t euid, uid_t suid);(ruid, euid, suid)
+#endif /* HAVE_SETRESUID */
+#ifdef HAVE_SETRESGID
+setresgid;int;(gid_t rgid, gid_t egid, gid_t sgid);(rgid, egid, sgid)
+#endif /* HAVE_SETRESGID */
+#ifdef HAVE_SETFSUID
+setfsuid;uid_t;(uid_t fsuid);(fsuid)
+#endif /* HAVE_SETFSUID */
+#ifdef HAVE_SETFSGID
+setfsgid;gid_t;(gid_t fsgid);(fsgid)
+#endif /* HAVE_SETFSGID */
+initgroups;int;(const char *user, INITGROUPS_SECOND_ARG group);(user, group)
+setgroups;int;(SETGROUPS_SIZE_TYPE size, const gid_t *list);(size, list)
+
+#ifdef HAVE_FSTATAT
+#ifdef HAVE_FCHMODAT
+fchmodat;int;(int dir_fd, const char *path, mode_t mode, int flags);(dir_fd, path, mode, flags)
+#endif /* HAVE_FCHMODAT */
+#ifdef HAVE_FCHOWNAT
+fchownat;int;(int dir_fd, const char *path, uid_t owner, gid_t group, int flags);(dir_fd, path, owner, group, flags)
+#endif /* HAVE_FCHOWNAT */
+#ifdef HAVE_MKDIRAT
+mkdirat;int;(int dir_fd, const char *pathname, mode_t mode);(dir_fd, pathname, mode)
+#endif /* HAVE_MKDIRAT */
+#ifdef HAVE_OPENAT
+openat;int;(int dir_fd, const char *pathname, int flags);(dir_fd, pathname, flags)
+#endif /* HAVE_OPENAT */
+#ifdef HAVE_RENAMEAT
+renameat;int;(int olddir_fd, const char *oldpath, int newdir_fd, const char *newpath);(olddir_fd, oldpath, newdir_fd, newpath)
+#endif /* HAVE_RENAMEAT */
+#ifdef HAVE_UNLINKAT
+unlinkat;int;(int dir_fd, const char *pathname, int flags);(dir_fd, pathname, flags)
+#endif /* HAVE_UNLINKAT */
+#endif /* HAVE_FSTATAT */
+
+#ifdef HAVE_SYS_ACL_H
+acl_set_fd;int;(int fd, acl_t acl);(fd, acl)
+acl_set_file;int;(const char *path_p, acl_type_t type, acl_t acl);(path_p, type, acl)
+#endif /* HAVE_SYS_ACL_H */
