@@ -4,7 +4,7 @@ LxG1.0.10mp5 open source release note for TC7210/TC7230 models
 How to bulid all the linux partition images
 
 * Checkout source code from GitHub :
-	* $git clone https://github.com/mailenh/TC72XX_LxG1.0.10mp5_OpenSrc.git
+	* $git clone https://github.com/tch-opensrc/TC72XX_LxG1.0.10mp5_OpenSrc.git
 	* $cd TC72XX_LxG1.0.10mp5_OpenSrc
 
 * Install toolchains on /opt :
