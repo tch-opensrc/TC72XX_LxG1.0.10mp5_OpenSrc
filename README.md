@@ -16,12 +16,12 @@ How to bulid all the linux partition images
 	
 * All the partition images will be created on targets/3384 :
 	* kernel and rootfs for nor - bcm3384_kernel_rootfs_squash
-	*							- bcm93383LxG_kernel_rootfs_squash
+	*			    - bcm93383LxG_kernel_rootfs_squash
 	* apps partition for nor    - bcm3384_apps.bin_nor_jffs2
-	*							- bcm93383LxG_apps.bin_nor_jffs2
+	*			    - bcm93383LxG_apps.bin_nor_jffs2
 	* kernel for nand           - bcm3384_kernel
-	*							- bcm93383LxG_kernel
+	*			    - bcm93383LxG_kernel
 	* rootfs for nand           - bcm3384_rootfs_ubifs_bs128k_ps2k
-	*							- bcm93383LxG_rootfs_ubifs_bs128k_ps2k
+	*			    - bcm93383LxG_rootfs_ubifs_bs128k_ps2k
 	* apps patition for nand    - bcm3384_apps.bin_nand_ubifs_bs128k_ps2k
-	*							- bcm93383LxG_apps.bin_nand_ubifs_bs128k_ps2k
+	*			    - bcm93383LxG_apps.bin_nand_ubifs_bs128k_ps2k
