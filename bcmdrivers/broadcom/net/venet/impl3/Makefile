@@ -8,9 +8,9 @@ ifeq ($(strip $(CONFIG_BCM_APROUTER)),y)
 endif
 
 ifneq ($(strip $(CONFIG_BCM_VENET)),)
-obj-$(CONFIG_BCM_VENET) = bcm_venet.o
+obj-$(CONFIG_BCM_VENET) = $(BRCM_CHIP)/bcm_venet.o
 endif
-bcm_venet-objs := bcmvenet.o
+bcm_venet-objs := $(BRCM_CHIP)/bcmvenet.o
 
 #-DDUMP_DATA  -- dump data
 #-DUSE_BH     -- use bottom half

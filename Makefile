@@ -1018,6 +1018,7 @@ kernel_clean: sanity_check
 	rm -f $(HOSTTOOLS_DIR)/lzma/decompress/*.o
 	rm -rf $(XCHANGE_DIR)/dslx/lib/LinuxKernel
 	rm -rf $(XCHANGE_DIR)/dslx/obj/LinuxKernel
+	@find bcmdrivers/ -type l | xargs rm -f
 
 bcmdrivers_clean:
 	$(MAKE) -C bcmdrivers clean

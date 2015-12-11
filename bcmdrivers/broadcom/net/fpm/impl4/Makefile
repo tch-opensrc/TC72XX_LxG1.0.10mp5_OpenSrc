@@ -1,9 +1,9 @@
 
 ifneq ($(strip $(CONFIG_BCM_FPM)),)
-obj-$(CONFIG_BCM_FPM) = bcm_fpm.o
+obj-$(CONFIG_BCM_FPM) = $(BRCM_CHIP)/bcm_fpm.o
 endif
 
-bcm_fpm-objs := fpm_client.o
+bcm_fpm-objs := $(BRCM_CHIP)/fpm_client.o
 
 EXTRA_CFLAGS += -I$(obj) 
 EXTRA_CFLAGS += -I$(INC_BRCMDRIVER_PUB_PATH)/$(BRCM_BOARD)

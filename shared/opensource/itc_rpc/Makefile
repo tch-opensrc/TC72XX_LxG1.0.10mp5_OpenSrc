@@ -1,4 +1,4 @@
-obj-$(CONFIG_BCM_ITCRPC)	+= itc_msg_q.o  itc_rpc.o itc_user.o
+obj-$(CONFIG_BCM_ITCRPC)	+= $(BRCM_CHIP)/itc_msg_q.o  $(BRCM_CHIP)/itc_rpc.o $(BRCM_CHIP)/itc_user.o
 
 EXTRA_CFLAGS += -DCONFIG_BCM9$(BRCM_CHIP)
 EXTRA_CFLAGS += -I$(INC_BRCMDRIVER_PUB_PATH)/$(BRCM_BOARD)

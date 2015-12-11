@@ -1,5 +1,5 @@
-obj-$(CONFIG_BCM_ITCRPC)	+= linux_services.o
-obj-$(CONFIG_BCM_VFLASH)	+= vflash.o
+obj-$(CONFIG_BCM_ITCRPC)	+= $(BRCM_CHIP)/linux_services.o
+obj-$(CONFIG_BCM_VFLASH)	+= $(BRCM_CHIP)/vflash.o
 
 EXTRA_CFLAGS += -DCONFIG_BCM9$(BRCM_CHIP)
 EXTRA_CFLAGS += -I$(INC_ITC_RPC_PATH)

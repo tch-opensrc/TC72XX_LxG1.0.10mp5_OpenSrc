@@ -380,6 +380,7 @@ export MODVERDIR := $(if $(KBUILD_EXTMOD),$(firstword $(KBUILD_EXTMOD))/).tmp_ve
 
 BRCMDRIVERS_IGNORE := -o -name bcmdqm.o -o -name dqm.o -o -name dqm_*.o -o -name bcm_fpm.o -o -name fpm_client.o -o -name bcm_venet.o -o -name bcmvenet.o \
 					  -o -name itc_msg_q.o -o -name itc_rpc.o -o -name itc_user.o -o -name linux_services.o -o -name vflash.o \
+					  -o -name BcmBfcFpmDriver*.o -o -name bcmfpm.o -o -name hostDqmHalIf.o -o -name bcm_iop.o -o -name bcmiop.o \
 					  -o -name bcm*-platform-devs.o
 RCS_FIND_IGNORE := \( -name SCCS -o -name BitKeeper -o -name .svn -o -name CVS -o -name .pc -o -name .hg -o -name .git -o -name dspApp*_*.o $(BRCMDRIVERS_IGNORE) \) -prune -o
 export RCS_TAR_IGNORE := --exclude SCCS --exclude BitKeeper --exclude .svn --exclude CVS --exclude .pc --exclude .hg --exclude .git

@@ -4,9 +4,9 @@
 #
 
 ifneq ($(strip $(CONFIG_BCM_DQM)),)
-obj-$(CONFIG_BCM_DQM) = dqm.o
+obj-$(CONFIG_BCM_DQM) = $(BRCM_CHIP)/dqm.o
 endif
-dqm-objs := bcmdqm.o
+dqm-objs := $(BRCM_CHIP)/bcmdqm.o
 
 EXTRA_CFLAGS += -I$(obj) 
 EXTRA_CFLAGS += -I$(INC_BRCMDRIVER_PUB_PATH)/$(BRCM_BOARD)
